@@ -6,17 +6,26 @@
 [![Latency](https://img.shields.io/badge/Haptic%20Latency-4ms%20--%2012ms-purple.svg)](#force-feedback--haptics-engine)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-**NeuroPad** is a system-level virtual gamepad driver and controller emulation suite for Android. It bridges physical game controllers (connected via USB Host, Type-C, or Bluetooth) directly into the Android Linux kernel's User-space HID (`/dev/uhid`) subsystem.
+**NeuroPad brings rumble (vibration) back to USB gamepads on Android.**
 
-This repository provides the **Universal 1-Click Installer** package, allowing anyone on **Windows, macOS, or Linux** to install NeuroPad, deploy the native kernel gamepad daemon (`uinput_proto`), and activate offline rootless loopback virtualization in seconds.
+On Android, a gamepad plugged in over **USB / Type-C** usually has **no working vibration**: games send rumble commands, but they never reach the controller's motors. NeuroPad fixes this by simulating a **wireless controller** (Xbox Wireless, DualShock 4, DualSense and others) that Android and games fully support with rumble. Your USB gamepad drives the virtual controller, and every rumble the game sends to it is routed back to your USB gamepad's motors.
+
+This repository provides the **Universal 1-Click Installer** package, allowing anyone on **Windows, macOS, or Linux** to install NeuroPad onto an Android phone and enable it in seconds. No root needed.
 
 ---
 
 ## ⚡ Why NeuroPad?
 
-Many competitive mobile titles (such as *Call of Duty: Mobile*, *Warzone Mobile*, *Genshin Impact*, *Minecraft*, and console emulators) restrict controller gameplay exclusively to official Xbox or PlayStation hardware. Generic Bluetooth gamepads, USB-C telescopic grips (GameSir, Razer Kishi, Backbone), and custom arcade sticks are frequently rejected or lack haptic vibration.
+### The problem
+* You plug a USB gamepad (or a USB-C telescopic grip) into your Android phone.
+* Buttons and sticks work, but **vibration never works** in any game, because Android doesn't forward rumble to most USB controllers.
 
-NeuroPad solves this system-wide:
+### The solution
+* NeuroPad creates a **virtual wireless controller** inside Android's kernel input system (`/dev/uhid`), which games see as a real Xbox or PlayStation controller with rumble support.
+* Your USB gamepad's input is fed into that virtual controller.
+* When a game vibrates the virtual controller, NeuroPad catches the rumble and **plays it on your USB gamepad's motors** in real time (4–12 ms).
+
+### Features
 * **Zero Root Required:** Emulates an authentic controller using a local ADB loopback daemon (`adbd` on port `5555`). Root is fully supported as an optional fallback.
 * **Authentic Hardware Descriptors:** Spawns native virtual controllers with legitimate Vendor ID (VID) and Product ID (PID) descriptors.
 * **Sub-12ms Low-Latency Force Feedback:** Features a bi-directional haptics routing engine that reads kernel output reports (`FF_RUMBLE`) and actuates physical rumble motors with native responsiveness.
@@ -64,8 +73,8 @@ chmod +x install_neuropad.sh
 
 ### Step 4: Play!
 1. Unplug the USB cable from your computer.
-2. Connect your physical gamepad (USB-C cable or Bluetooth) to your phone.
-3. Open the **NeuroPad** app and toggle **Gamepad Virtualization** to **ON**.
+2. Connect your USB gamepad to your phone (USB-C cable or OTG adapter).
+3. Open the **NeuroPad** app, pick a wireless controller profile (e.g. Xbox Wireless or DualSense), and toggle **Gamepad Virtualization** to **ON**. Rumble now reaches your USB gamepad.
 
 ---
 
