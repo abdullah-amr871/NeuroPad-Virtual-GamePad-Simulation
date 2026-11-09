@@ -6,7 +6,7 @@
 [![Latency](https://img.shields.io/badge/Haptic%20Latency-4ms%20--%2012ms-purple.svg)](#force-feedback--haptics-engine)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-**NeuroPad brings rumble (vibration) back to USB gamepads on Android.**
+**NeuroPad brings rumble (vibration) back to USB gamepads on Android.** Built for and tested on the **GameSir G8 Plus (MFi)**.
 
 On Android, a gamepad plugged in over **USB / Type-C** usually has **no working vibration**: games send rumble commands, but they never reach the controller's motors. NeuroPad fixes this by simulating a **wireless controller** (Xbox Wireless, DualShock 4, DualSense and others) that Android and games fully support with rumble. Your USB gamepad drives the virtual controller, and every rumble the game sends to it is routed back to your USB gamepad's motors.
 
@@ -30,6 +30,19 @@ This repository provides the **Universal 1-Click Installer** package, allowing a
 * **Authentic Hardware Descriptors:** Spawns native virtual controllers with legitimate Vendor ID (VID) and Product ID (PID) descriptors.
 * **Sub-12ms Low-Latency Force Feedback:** Features a bi-directional haptics routing engine that reads kernel output reports (`FF_RUMBLE`) and actuates physical rumble motors with native responsiveness.
 * **1-Click Plug & Play:** Automated installers bundle portable platform tools — no manual SDK configuration or command-line gymnastics required.
+
+---
+
+## ✅ Tested Controllers
+
+NeuroPad was built for, and tested on, the **GameSir G8 Plus (MFi, Apple-certified)** USB-C gamepad.
+
+| Controller | Status |
+| :--- | :--- |
+| GameSir G8 Plus (MFi) | ✅ Tested and working (rumble included) |
+| Other USB gamepads | ⚠️ Not tested yet. They may work, but nothing is guaranteed |
+
+Tried it with another controller? Please [open an issue](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/issues) and say whether buttons and rumble worked, so the list can grow.
 
 ---
 
