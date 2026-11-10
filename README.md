@@ -52,6 +52,7 @@ Works with **XInput (Xbox-mode) USB gamepads**. Confirmed on the **GameSir G8 Pl
 - **No root.** The app talks to the phone's own ADB service on `127.0.0.1`. Root is supported too, if you have it.
 - **No computer needed on Android 11+.** Pair once with Wireless debugging and the app installs its own driver.
 - **Phone-vibration fallback.** For games that only vibrate the phone, that vibration is mirrored to the gamepad, split across the heavy and light motor.
+- **Rumble on the phone.** Optionally plays game rumble on the phone's own motor too, for gamepads without rumble motors.
 - **Button remapping.** Default, Nintendo (A/B and X/Y swapped) or a fully custom layout, including back paddles.
 - **Live controller view, rumble test and diagnostics** to see exactly what arrives and why something does not.
 - **Follows the gamepad.** The bridge stops when the gamepad is unplugged and can start by itself when it is plugged in.
@@ -60,12 +61,12 @@ Works with **XInput (Xbox-mode) USB gamepads**. Confirmed on the **GameSir G8 Pl
 
 ## Download
 
-**[Download NeuroPad 2.0.2](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/releases/tag/v2.0.2)** &nbsp;·&nbsp; [all releases](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/releases)
+**[Download NeuroPad 2.0.4](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/releases/tag/v2.0.4)** &nbsp;·&nbsp; [all releases](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/releases)
 
 | File | Use it when |
 | :--- | :--- |
-| `NeuroPad_2.0.2_OneClick_Installer.zip` | You have a computer nearby. Installs everything with one double-click. |
-| `NeuroPad_2.0.2.apk` | You want to install straight on the phone (Android 11+, Wireless debugging). |
+| `NeuroPad_2.0.4_OneClick_Installer.zip` | You have a computer nearby. Installs everything with one double-click. |
+| `NeuroPad_2.0.4.apk` | You want to install straight on the phone (Android 11+, Wireless debugging). |
 
 ## Requirements
 
@@ -88,7 +89,7 @@ Android closes the ADB port when the phone reboots. Afterwards, connect it again
 
 ### Option B: on the phone only (Android 11+)
 
-1. Install `NeuroPad_2.0.2.apk`.
+1. Install `NeuroPad_2.0.4.apk`.
 2. Open the **Connection** tab, keep **Wireless debugging** selected and tap **Start pairing**.
 3. In Developer options, enable **Wireless debugging**, tap the text itself and choose **Pair device with pairing code**.
 4. Type the six digit code into the NeuroPad notification.
@@ -118,9 +119,10 @@ These controllers support XInput (Xbox mode) over USB, so NeuroPad should work w
 | :--- | :--- |
 | GameSir | G8 Plus (MFi), G8 Galileo, X2 Pro (Xbox edition), X3 Pro, X4 Aileron |
 | Razer | Kishi Ultra, Kishi V2 Pro, Kishi V3 Pro |
-| 8BitDo | Ultimate Mobile |
 
-> NeuroPad passes rumble to the controller's motors, so the controller must have rumble motors. Check that yours lists rumble or vibration in its specs. Controllers without motors can still be used for input, but they cannot vibrate.
+> NeuroPad passes rumble to the controller's motors, so the controller must have rumble motors. Check that yours lists rumble or vibration in its specs. Controllers without motors can still be used for input; turn on **Settings > Rumble > Rumble on the phone too** to feel the rumble in the phone instead.
+>
+> Bluetooth-only controllers such as the 8BitDo Ultimate Mobile cannot be bridged: NeuroPad works over USB.
 
 **Console / PC controllers with rumble motors (USB cable or USB-C adapter)**
 
@@ -211,6 +213,9 @@ Change **Settings > Rumble > Strength**. If short effects are hard to feel, rais
 
 **The buttons A/B (or X/Y) are swapped.**
 XInput gamepads report buttons by position, not by the letter on the cap. If your caps are in the Nintendo arrangement, choose the **Nintendo** layout on the Controller tab.
+
+**My gamepad has no rumble motors. Can the phone vibrate instead?**
+Yes. Turn on **Settings > Rumble > Rumble on the phone too**. Keep Android's *Vibrate input devices* (Developer options) off for this, otherwise Android sends the vibration to the controller.
 
 **The gamepad vibrates when I type or tap in the launcher.**
 Android forwards all phone vibration to a connected controller. Keep **Settings > Rumble > Ignore system vibration** on.

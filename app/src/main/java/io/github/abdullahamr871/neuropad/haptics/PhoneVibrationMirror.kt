@@ -93,6 +93,12 @@ class PhoneVibrationMirror(
         for (event in VibrationLogParser.parse(line)) {
             when (event) {
                 is VibrationEvent.Caller -> {
+                    if (event.packageName == ownPackage) {
+                        // NeuroPad's own "rumble on the phone": never replay it on the
+                        // gamepad, and do not treat it as a system echo that cuts rumble.
+                        mutedCaller = true
+                        continue
+                    }
                     mutedCaller = VibrationLogParser.isSystemCaller(event.packageName, ownPackage)
                     onCaller(mutedCaller)
                 }

@@ -68,6 +68,12 @@ fun SettingsScreen(vm: AppViewModel, onQuit: () -> Unit) {
                 vm.muteSystemHaptics, vm::updateMuteSystem,
             )
 
+            SwitchRow(
+                "Rumble on the phone too",
+                "Plays game rumble on the phone's own vibration motor as well. Useful for gamepads without rumble motors.",
+                vm.phoneRumble, vm::updatePhoneRumble,
+            )
+
             Text("Stuck-motor guard", fontWeight = FontWeight.Medium)
             Row(
                 Modifier.horizontalScroll(rememberScrollState()),

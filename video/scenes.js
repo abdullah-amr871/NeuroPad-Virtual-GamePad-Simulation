@@ -281,7 +281,7 @@ const scenes = {
 
   '11-controllers': () => {
     const b = [['GameSir', 'G8 Plus (MFi), G8 Galileo, X2 Pro, X3 Pro, T4 Pro, Cyclone 2'], ['Razer', 'Kishi Ultra, Kishi V2 Pro, Kishi V3 Pro, Wolverine V2 / V3'],
-      ['8BitDo', 'Ultimate Mobile, Ultimate, Ultimate C, Pro 2, SN30 Pro'], ['Flydigi', 'Vader 3 / 3 Pro / 4 Pro, Apex 4'],
+      ['8BitDo', 'Ultimate (wired / 2.4G), Ultimate C, Pro 2, SN30 Pro'], ['Flydigi', 'Vader 3 / 3 Pro / 4 Pro, Apex 4'],
       ['Microsoft', 'Xbox 360, Xbox One, Xbox Series X|S, Elite'], ['Others', 'PowerA, PDP, Logitech F710 and other XInput pads']];
     return `
 <style>.g{margin-top:60px;display:grid;grid-template-columns:repeat(3,1fr);gap:26px}

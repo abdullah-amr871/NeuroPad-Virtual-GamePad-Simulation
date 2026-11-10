@@ -115,6 +115,14 @@ class Settings(context: Context) {
         get() = prefs.getBoolean("phone_vibration_fallback", true)
         set(value) = prefs.edit().putBoolean("phone_vibration_fallback", value).apply()
 
+    /**
+     * Also play controller rumble on the phone's own vibration motor: for gamepads without
+     * rumble motors, or to feel it in the phone as well.
+     */
+    var phoneRumble: Boolean
+        get() = prefs.getBoolean("phone_rumble", false)
+        set(value) = prefs.edit().putBoolean("phone_rumble", value).apply()
+
     /** Start the bridge by itself when a gamepad is plugged in. */
     var autoStart: Boolean
         get() = prefs.getBoolean("auto_start", false)
