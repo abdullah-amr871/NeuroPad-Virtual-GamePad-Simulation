@@ -1,5 +1,39 @@
 # Changelog
 
+## 2.0.1
+
+First version that was run on real hardware: a Nothing Phone (2) on Android 16 with a GameSir
+G8 Plus. Input, the virtual controller and rumble were confirmed there.
+
+### Fixed
+
+- **Launcher taps, keyboard clicks and notifications rumbled the gamepad.** With "vibrate
+  input devices" enabled (the default on Nothing phones) Android forwards every phone
+  vibration to a connected controller. 1.0 muted the system ones; 2.0.0 dropped that by
+  mistake. It is back, now based on the caller named in the vibration log, and it expires by
+  itself instead of sticking until another app vibrates.
+- **Weak, late rumble from short effects.** Games send ticks of 10-20 ms that a phone motor
+  can play but a gamepad motor cannot. Pulses are now stretched to at least 80 ms.
+- **Stuttering during long rumbles.** Long effects arrive as ~100 ms pulses separated by
+  gaps of a few milliseconds. Those gaps are bridged instead of being passed to the motors.
+- Vibration requests are now recognised on Android 13+ (`VibratorManagerService` lines).
+
+### Changed
+
+- **The bridge follows the gamepad.** It stops by itself when the gamepad is unplugged, so
+  no ghost controller stays visible to games, and it refuses to start while none is
+  connected. Optionally it also starts by itself when the gamepad is plugged in.
+- **Adaptive layout.** Every screen uses two panes from 600 dp of width (landscape,
+  foldables, tablets) and a single column otherwise.
+
+### New
+
+- Settings > Controls > **Start when the gamepad is plugged in**.
+- Settings > Rumble > **Shortest rumble** (Off, 40, 80, 120, 200 ms).
+- Settings > Rumble > **Ignore system vibration**.
+- The app turns to landscape while a gamepad is plugged in, with the navigation on a side
+  rail, so it can be used with the phone sitting in the grip.
+
 ## 2.0.0
 
 A complete rewrite. Version 1.0 was distributed as a patched binary; 2.0 is built from the
@@ -8,8 +42,7 @@ source in this repository. Every feature of 1.0 is still there.
 Version 2 installs as a new app (`io.github.abdullahamr871.neuropad`). The installer removes
 the 1.0 app (`com.g8.driver`); settings are not carried over.
 
-> 2.0.0 was verified with unit tests and JVM-rendered screens. It had not been run on a
-> physical phone with a gamepad at the time of release.
+> 2.0.0 was verified with unit tests and JVM-rendered screens only. Use 2.0.1 or newer.
 
 ### New
 

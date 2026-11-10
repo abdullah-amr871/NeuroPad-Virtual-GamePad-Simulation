@@ -84,6 +84,20 @@ class Settings(context: Context) {
         get() = prefs.getInt("rumble_timeout_ms", 5000)
         set(value) = prefs.edit().putInt("rumble_timeout_ms", value).apply()
 
+    /**
+     * Shortest rumble that is passed on. Phones play 10-20 ms haptic ticks, but the spinning
+     * motors of a gamepad need several times that to become noticeable, so shorter requests
+     * are stretched to this length. 0 passes everything through unchanged.
+     */
+    var minPulseMs: Int
+        get() = prefs.getInt("min_pulse_ms", 80)
+        set(value) = prefs.edit().putInt("min_pulse_ms", value).apply()
+
+    /** Drop rumble that Android forwards from the system UI, launcher or keyboard. */
+    var muteSystemHaptics: Boolean
+        get() = prefs.getBoolean("mute_system_haptics", true)
+        set(value) = prefs.edit().putBoolean("mute_system_haptics", value).apply()
+
     var hapticLowThreshold: Int
         get() = prefs.getInt("haptic_low_threshold", 80)
         set(value) = prefs.edit().putInt("haptic_low_threshold", value).apply()
@@ -100,6 +114,11 @@ class Settings(context: Context) {
     var phoneVibrationFallback: Boolean
         get() = prefs.getBoolean("phone_vibration_fallback", true)
         set(value) = prefs.edit().putBoolean("phone_vibration_fallback", value).apply()
+
+    /** Start the bridge by itself when a gamepad is plugged in. */
+    var autoStart: Boolean
+        get() = prefs.getBoolean("auto_start", false)
+        set(value) = prefs.edit().putBoolean("auto_start", value).apply()
 
     var homeCombo: Boolean
         get() = prefs.getBoolean("home_combo", true)

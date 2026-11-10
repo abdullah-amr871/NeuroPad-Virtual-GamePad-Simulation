@@ -101,6 +101,22 @@ class RumblePathTest {
     }
 
     @Test
+    fun `android 16 vibrator manager lines name the caller`() {
+        // Captured from a Nothing Phone (2) on Android 16.
+        val game = "D/VibratorManagerService( 2569): vibrate uid =10358, opPkg = com.mojang.minecraftpe, " +
+            "reason = null, attrs = VibrationAttributes{mUsage=TOUCH, mAudioUsage= USAGE_UNKNOWN, mFlags=0}"
+        assertEquals(listOf(VibrationEvent.Caller("com.mojang.minecraftpe")), VibrationLogParser.parse(game))
+        assertFalse(VibrationLogParser.isSystemCaller("com.mojang.minecraftpe", "x"))
+        val launcher = "D/VibratorManagerService( 2569): vibrate uid =10200, opPkg = com.nothing.launcher, " +
+            "reason = performHapticFeedback(constant=1): ViewRootImpl#performHapticFeedback"
+        val caller = VibrationLogParser.parse(launcher).first() as VibrationEvent.Caller
+        assertTrue(VibrationLogParser.isSystemCaller(caller.packageName, "x"))
+        // A line that merely mentions a package must not count as a request.
+        val appOp = "D/VibratorManagerService: Check AppOp mode VIBRATE for uid 10358 and package com.mojang.minecraftpe returned op=allow"
+        assertTrue(VibrationLogParser.parse(appOp).isEmpty())
+    }
+
+    @Test
     fun `richtap and stop lines`() {
         assertEquals(listOf(VibrationEvent.RichTapDuration(35)), VibrationLogParser.parse("richTapVibratorOn duration : 35 ms"))
         assertEquals(listOf(VibrationEvent.RichTapStrength(180)), VibrationLogParser.parse("richTapVibratorSetAmplitude strength : 180"))

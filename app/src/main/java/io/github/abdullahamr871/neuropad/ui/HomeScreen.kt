@@ -9,9 +9,12 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -30,6 +33,8 @@ import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,12 +57,44 @@ import io.github.abdullahamr871.neuropad.bridge.BridgeStatus
 import io.github.abdullahamr871.neuropad.bridge.RumbleSource
 import io.github.abdullahamr871.neuropad.core.EmulationProfile
 
+/** True while the screen is laid out as two side-by-side panes. */
+val LocalTwoPane = compositionLocalOf { false }
+
+/**
+ * The layout of every screen. On a narrow window (a phone held upright) [first] and
+ * [second] are stacked in one scrolling column. From 600 dp of width (a phone held
+ * sideways, a foldable, a tablet) they become two columns that scroll independently, so
+ * the main control of a screen stays in view while the details are browsed.
+ */
 @Composable
-fun ScreenColumn(content: @Composable () -> Unit) {
-    Column(
-        Modifier.verticalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(14.dp),
-    ) { content() }
+fun TwoPane(first: @Composable () -> Unit, second: @Composable () -> Unit) {
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+        if (maxWidth >= 600.dp) {
+            CompositionLocalProvider(LocalTwoPane provides true) {
+                Row(
+                    Modifier.fillMaxSize().padding(horizontal = 12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    for (pane in listOf(first, second)) {
+                        Column(
+                            Modifier.weight(1f).fillMaxHeight().verticalScroll(rememberScrollState())
+                                .padding(vertical = 12.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                        ) { pane() }
+                    }
+                }
+            }
+        } else {
+            Column(
+                Modifier.fillMaxSize().verticalScroll(rememberScrollState())
+                    .padding(horizontal = 16.dp, vertical = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp),
+            ) {
+                first()
+                second()
+            }
+        }
+    }
 }
 
 @Composable
@@ -67,7 +104,7 @@ fun HomeScreen(vm: AppViewModel, onStart: () -> Unit, onNavigate: (Int) -> Unit)
     val connectedPad by BridgeState.usbDeviceName.collectAsStateWithLifecycle()
     val rumble by BridgeState.rumble.collectAsStateWithLifecycle()
 
-    ScreenColumn {
+    TwoPane(first = {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
                 Modifier.size(46.dp).clip(RoundedCornerShape(14.dp)).background(Np.Accent),
@@ -82,8 +119,8 @@ fun HomeScreen(vm: AppViewModel, onStart: () -> Unit, onNavigate: (Int) -> Unit)
             }
         }
 
-        PowerCard(status, onStart)
-
+        PowerCard(status, padPresent = connectedPad != null || vm.detectedPad != null, onToggle = onStart)
+    }, second = {
         Panel(title = "Checklist") {
             val shellTone: Tone
             val shellDetail: String
@@ -178,25 +215,28 @@ fun HomeScreen(vm: AppViewModel, onStart: () -> Unit, onNavigate: (Int) -> Unit)
                 }
             }
         }
-    }
+    })
 }
 
 @Composable
-private fun PowerCard(status: BridgeStatus, onToggle: () -> Unit) {
+private fun PowerCard(status: BridgeStatus, padPresent: Boolean, onToggle: () -> Unit) {
     val active = status is BridgeStatus.Running
     val starting = status is BridgeStatus.Starting
     // The halo grows once when the bridge comes up. (A never-ending pulse would keep the
     // screen redrawing, and the GPU busy, for as long as the app is open during a game.)
     val halo by animateFloatAsState(if (active) 1.06f else 0.9f, tween(500), label = "halo")
+    // Sideways the screen is short: a smaller button keeps the status text visible.
+    val outer = if (LocalTwoPane.current) 112.dp else 156.dp
+    val inner = if (LocalTwoPane.current) 88.dp else 124.dp
     Panel {
         Column(Modifier.fillMaxWidth().padding(vertical = 8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             Box(contentAlignment = Alignment.Center) {
                 Box(
-                    Modifier.size(156.dp).scale(halo).clip(CircleShape)
+                    Modifier.size(outer).scale(halo).clip(CircleShape)
                         .background(if (active) Np.AccentSoft else Brush.linearGradient(listOf(Np.SurfaceHigh, Np.SurfaceHigh))),
                 )
                 Box(
-                    Modifier.size(124.dp).clip(CircleShape)
+                    Modifier.size(inner).clip(CircleShape)
                         .background(if (active) Np.Accent else Brush.linearGradient(listOf(Np.SurfaceHigh, Np.Surface)))
                         .border(2.dp, if (active) Color.Transparent else Np.Outline, CircleShape)
                         .clickable(role = Role.Switch, onClickLabel = if (active) "Stop the bridge" else "Start the bridge", onClick = onToggle),
@@ -209,7 +249,7 @@ private fun PowerCard(status: BridgeStatus, onToggle: () -> Unit) {
                             Icons.Rounded.PowerSettingsNew,
                             contentDescription = null,
                             tint = if (active) Color.White else Np.TextDim,
-                            modifier = Modifier.size(58.dp),
+                            modifier = Modifier.size(inner * 0.46f),
                         )
                     }
                 }
@@ -220,7 +260,7 @@ private fun PowerCard(status: BridgeStatus, onToggle: () -> Unit) {
                     is BridgeStatus.Running -> "Bridge is active"
                     is BridgeStatus.Starting -> "Starting"
                     is BridgeStatus.Failed -> "Could not start"
-                    BridgeStatus.Stopped -> "Bridge is off"
+                    BridgeStatus.Stopped -> if (padPresent) "Bridge is off" else "No gamepad connected"
                 },
                 fontSize = 20.sp,
                 fontWeight = FontWeight.SemiBold,
@@ -232,7 +272,9 @@ private fun PowerCard(status: BridgeStatus, onToggle: () -> Unit) {
                     is BridgeStatus.Running -> "Games now see a ${status.deviceName} with working rumble."
                     is BridgeStatus.Starting -> status.step
                     is BridgeStatus.Failed -> status.message
-                    BridgeStatus.Stopped -> "Tap the button to give your USB gamepad rumble."
+                    BridgeStatus.Stopped ->
+                        if (padPresent) "Tap the button to give your USB gamepad rumble."
+                        else "Plug your gamepad into the phone. The bridge runs only while it is connected."
                 },
                 color = Np.TextDim,
                 fontSize = 14.sp,

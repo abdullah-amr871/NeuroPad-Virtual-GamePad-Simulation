@@ -50,7 +50,7 @@ fun ConnectionScreen(vm: AppViewModel) {
     var showPairDialog by remember { mutableStateOf(false) }
     var showPortDialog by remember { mutableStateOf(false) }
 
-    ScreenColumn {
+    TwoPane(first = {
         Panel(title = "How NeuroPad gets system access") {
             Hint(
                 "Creating a virtual controller needs the rights of the Android shell user. " +
@@ -94,6 +94,7 @@ fun ConnectionScreen(vm: AppViewModel) {
             }
         }
 
+    }, second = {
         when (vm.accessMode) {
             AccessMode.WIRELESS_DEBUGGING -> {
                 Panel(
@@ -160,7 +161,7 @@ fun ConnectionScreen(vm: AppViewModel) {
                 Hint("Keep NeuroPad allowed in your root manager (Magisk, KernelSU, APatch).")
             }
         }
-    }
+    })
 
     if (showPairDialog) {
         var port by remember { mutableStateOf("") }

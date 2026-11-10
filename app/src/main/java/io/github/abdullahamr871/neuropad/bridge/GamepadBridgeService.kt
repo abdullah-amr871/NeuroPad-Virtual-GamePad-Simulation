@@ -9,12 +9,15 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.os.Build
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.os.PowerManager
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import io.github.abdullahamr871.neuropad.R
 import io.github.abdullahamr871.neuropad.ui.MainActivity
+import io.github.abdullahamr871.neuropad.usb.UsbGamepadManager
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
@@ -85,8 +88,16 @@ class GamepadBridgeService : Service() {
 
     private fun startSession() {
         if (session != null) return
+        if (UsbGamepadManager.findCompatible(this) == null) {
+            // Also covers starts from the Quick Settings tile and automatic reconnects.
+            BridgeState.log("Bridge", "Not started: no gamepad is plugged in")
+            settings.bridgeEnabled = false
+            stopSession(BridgeStatus.Failed("No gamepad is connected. Plug it in, then start the bridge."))
+            shutDown()
+            return
+        }
         acquireWakeLock()
-        val s = BridgeSession(this, settings, ::onSessionLost)
+        val s = BridgeSession(this, settings, ::onSessionLost, ::onGamepadGone)
         session = s
         try {
             s.start()
@@ -100,6 +111,26 @@ class GamepadBridgeService : Service() {
             if (session === s) {
                 settings.bridgeEnabled = false
                 stopSession(BridgeStatus.Failed(message))
+                stopForegroundCompat()
+                stopSelf()
+            }
+        }
+    }
+
+    private fun onGamepadGone() {
+        worker.execute {
+            if (session == null) return@execute
+            BridgeState.log("Bridge", "Gamepad unplugged, stopping the bridge")
+            settings.bridgeEnabled = false
+            stopSession(BridgeStatus.Stopped)
+            shutDown()
+        }
+    }
+
+    /** Leaves the foreground and ends the service; safe to call from the worker thread. */
+    private fun shutDown() {
+        Handler(Looper.getMainLooper()).post {
+            if (session == null) {
                 stopForegroundCompat()
                 stopSelf()
             }
@@ -276,7 +307,7 @@ class GamepadBridgeService : Service() {
         fun restart(context: Context) {
             val app = context.applicationContext
             app.startService(Intent(app, GamepadBridgeService::class.java).setAction(ACTION_STOP))
-            android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({ start(app) }, 700)
+            Handler(Looper.getMainLooper()).postDelayed({ start(app) }, 700)
         }
     }
 }

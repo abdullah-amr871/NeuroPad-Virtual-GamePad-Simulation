@@ -43,13 +43,30 @@ fun SettingsScreen(vm: AppViewModel, onQuit: () -> Unit) {
     val counters by BridgeState.counters.collectAsStateWithLifecycle()
     LaunchedEffect(status, counters.rumbleReports > 0) { vm.refreshChecks() }
 
-    ScreenColumn {
+    TwoPane(first = {
         Panel(title = "Rumble") {
             SliderRow(
                 "Strength", "%.1fx".format(vm.rumbleGain),
                 vm.rumbleGain, 0.5f..8f, steps = 14,
             ) { vm.updateGain((it * 2).roundToInt() / 2f) }
             Hint("Games usually ask for gentle rumble that small motors barely show. 4x is the default.")
+
+            Text("Shortest rumble", fontWeight = FontWeight.Medium)
+            Row(
+                Modifier.horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                listOf(0 to "Off", 40 to "40 ms", 80 to "80 ms", 120 to "120 ms", 200 to "200 ms").forEach { (ms, label) ->
+                    FilterChip(selected = vm.minPulseMs == ms, onClick = { vm.updateMinPulse(ms) }, label = { Text(label) })
+                }
+            }
+            Hint("Games often send ticks of 10-20 ms that a phone can play but gamepad motors cannot. Shorter pulses are stretched to this length.")
+
+            SwitchRow(
+                "Ignore system vibration",
+                "Android also forwards taps, keyboard clicks and notifications to the controller. This keeps them off the gamepad.",
+                vm.muteSystemHaptics, vm::updateMuteSystem,
+            )
 
             Text("Stuck-motor guard", fontWeight = FontWeight.Medium)
             Row(
@@ -82,12 +99,18 @@ fun SettingsScreen(vm: AppViewModel, onQuit: () -> Unit) {
 
         Panel(title = "Controls") {
             SwitchRow(
+                "Start when the gamepad is plugged in",
+                "The bridge always stops by itself when the gamepad is unplugged. With this on it also starts by itself.",
+                vm.autoStart, vm::updateAutoStart,
+            )
+            SwitchRow(
                 "Select + Start = Home",
                 "Pressing both together sends the Home / Guide / PS button.",
                 vm.homeCombo, vm::updateHomeCombo,
             )
         }
 
+    }, second = {
         Panel(title = "Background") {
             StatusRow(
                 "Battery optimisation",
@@ -157,7 +180,7 @@ fun SettingsScreen(vm: AppViewModel, onQuit: () -> Unit) {
                 modifier = Modifier.fillMaxWidth(),
             ) { Text("Stop the bridge and quit") }
         }
-    }
+    })
 
     vm.report?.let { text ->
         AlertDialog(

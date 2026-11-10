@@ -19,23 +19,27 @@ sealed interface VibrationEvent {
  */
 object VibrationLogParser {
     const val LOGCAT_COMMAND =
-        "logcat -T 1 -s VibratorService VibratorHal Vibrator NtVibratorManagerImpl " +
-            "VibratorController RichTapVibratorService AacRichTapConvert"
+        "logcat -T 1 -s VibratorManagerService VibratorService VibratorHal Vibrator " +
+            "NtVibratorManagerImpl VibratorController RichTapVibratorService AacRichTapConvert"
 
     private val ONE_SHOT = Regex("""OneShot\{mDuration=(\d+),\s*mAmplitude=(-?\d+)\}""")
     private val WAVEFORM =
         Regex("""Waveform\{mTimings=\[([\d,\s\-]+)],\s*mAmplitudes=\[([\d,\s\-]+)],\s*mRepeat=(-?\d+)\}""")
     private val WHITESPACE = Regex("\\s+")
-    private const val PKG = "pkgName = "
+    /** Vendor services print "pkgName = x"; AOSP VibratorManagerService prints "opPkg = x". */
+    private val CALLER_KEYS = listOf("opPkg = ", "pkgName = ")
     private val STOP_MARKERS = listOf("richtap service stop!!", "vibratorStop", "end current vibrate")
 
     /** A line may carry both a caller and an effect, so a list is returned. */
     fun parse(line: String): List<VibrationEvent> {
         val out = ArrayList<VibrationEvent>(2)
-        val pkgAt = line.indexOf(PKG)
-        if (pkgAt >= 0) {
-            val name = line.substring(pkgAt + PKG.length).substringBefore(',').replace("\"", "").trim()
-            out += VibrationEvent.Caller(name)
+        for (key in CALLER_KEYS) {
+            val at = line.indexOf(key)
+            if (at >= 0) {
+                val name = line.substring(at + key.length).substringBefore(',').replace("\"", "").trim()
+                out += VibrationEvent.Caller(name)
+                break
+            }
         }
         when {
             STOP_MARKERS.any { it in line } -> out += VibrationEvent.Stop
@@ -72,7 +76,9 @@ object VibrationLogParser {
     /** True when haptics from this caller are UI feedback rather than game rumble. */
     fun isSystemCaller(packageName: String, ownPackage: String): Boolean =
         packageName == "android" || packageName == ownPackage || packageName == "null" ||
-            "systemui" in packageName || "latin" in packageName
+            SYSTEM_HINTS.any { it in packageName }
+
+    private val SYSTEM_HINTS = listOf("systemui", "launcher", "inputmethod", "keyboard", "latin")
 
     /** -1 is VibrationEffect.DEFAULT_AMPLITUDE. */
     private fun normalise(amplitude: Int): Int = if (amplitude == -1) 255 else amplitude.coerceIn(0, 255)
