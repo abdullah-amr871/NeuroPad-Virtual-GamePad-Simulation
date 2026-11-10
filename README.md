@@ -16,7 +16,7 @@
 
 Plug a USB-C gamepad into an Android phone and the buttons work, but the **vibration never does**: Android does not pass rumble on to most USB controllers. NeuroPad fixes that. It shows games a **virtual wireless controller** (Xbox or PlayStation) that Android fully supports, feeds it with your USB gamepad, and sends every rumble the game produces back to the motors of the real pad.
 
-Built for, and tested on, the **GameSir G8 Plus (MFi)**.
+Works with **XInput (Xbox-mode) USB gamepads**. Confirmed on the **GameSir G8 Plus (MFi)** and the **Razer Kishi Ultra**.
 
 <p align="center">
   <img src="docs/screenshots/home.png" width="24%" alt="Home screen">
@@ -36,6 +36,7 @@ Built for, and tested on, the **GameSir G8 Plus (MFi)**.
 - [Download](#download)
 - [Set up](#set-up)
 - [Tested controllers](#tested-controllers)
+- [Supported controllers](#supported-controllers-should-work-not-tested-yet)
 - [Controller profiles](#controller-profiles)
 - [How it works](#how-it-works)
 - [What is new in 2.0](#what-is-new-in-20)
@@ -58,7 +59,7 @@ Built for, and tested on, the **GameSir G8 Plus (MFi)**.
 
 ## Download
 
-**[Download NeuroPad 2.0.2](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/releases/tag/v2.0.2)** &nbsp;·&nbsp; [all releases](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/releases)
+**[Download NeuroPad 2.0.2](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/releases/tag/v2.0.2)** &nbsp;Â·&nbsp; [all releases](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/releases)
 
 | File | Use it when |
 | :--- | :--- |
@@ -102,8 +103,39 @@ Choose **Root** in the Connection tab and grant superuser access. No ADB, Wi-Fi 
 
 | Controller | Status |
 | :--- | :--- |
-| GameSir G8 Plus (MFi) | Tested, rumble included (Nothing Phone 2, Android 16) |
-| Other XInput USB gamepads | Not tested yet. They should work, but nothing is promised |
+| GameSir G8 Plus (MFi) | Works, rumble included (Nothing Phone 2, Android 16) |
+| Razer Kishi Ultra | Works (user report) |
+| Other XInput USB gamepads | Should work. If your controller has a mode switch, set it to Xbox / XInput |
+
+## Supported controllers (should work, not tested yet)
+
+These controllers support XInput (Xbox mode) over USB, so NeuroPad should work with them. If yours has a mode switch, set it to **Xbox / XInput / X-mode**.
+
+**Mobile (phone clamp) controllers with rumble motors**
+
+| Brand | Controllers |
+| :--- | :--- |
+| GameSir | G8 Plus, G8 Galileo, X2 Pro (Xbox edition), X3 Pro, X4 Aileron |
+| Razer | Kishi Ultra, Kishi V2 Pro, Kishi V3 Pro |
+| 8BitDo | Ultimate Mobile |
+| Backbone | Backbone Pro |
+| EasySMX | M20 |
+| abxylute | S9 |
+
+**Console / PC controllers with rumble motors (USB cable or USB-C adapter)**
+
+| Brand | Controllers |
+| :--- | :--- |
+| Microsoft | Xbox 360 wired controller, Xbox One controller, Xbox Series X/S controller, Xbox Elite Series 1 / 2 |
+| GameSir | T4 Pro, T4 Kaleid, Nova Lite, Cyclone 2 |
+| Razer | Wolverine V2 / V2 Chroma / V3 |
+| 8BitDo | Ultimate (wired / 2.4G), Ultimate C, Pro 2, SN30 Pro |
+| Flydigi | Vader 3 / Vader 3 Pro / Vader 4 Pro, Apex 4 |
+| PowerA / PDP | Wired controllers for Xbox, Rock Candy for Xbox |
+| Logitech | F710 (switch on the back set to **X**) |
+| Others | Any USB gamepad that shows up as an Xbox 360 / Xbox One controller on a PC |
+
+Tried NeuroPad with another controller? Tell us in [Discussions](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/discussions) so it can be added here.
 
 > **Status of 2.0:** version 2.0 is a full rewrite. It has been run on one phone so far (Nothing Phone 2, Android 16, PC port 5555 mode) with the GameSir G8 Plus. Other phones, the Wireless debugging setup and root mode have not been tried on hardware yet. If something does not work for you, please [open an issue](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/issues) and attach the report from **Settings > Diagnostics > Share report**. [Version 1.0](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/releases/tag/v1.0.0) stays available.
 
@@ -223,6 +255,6 @@ Bug reports, controller test results and pull requests are welcome. Please inclu
 
 ## License
 
-[MIT](LICENSE) © Abdullah Amr Maged.
+[MIT](LICENSE) Â© Abdullah Amr Maged.
 
 Xbox, PlayStation, DualShock, DualSense and GameSir are trademarks of their respective owners. NeuroPad is not affiliated with or endorsed by any of them.
