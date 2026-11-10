@@ -122,7 +122,7 @@ These controllers support XInput (Xbox mode) over USB, so NeuroPad should work w
 
 > NeuroPad passes rumble to the controller's motors, so the controller must have rumble motors. Check that yours lists rumble or vibration in its specs. Controllers without motors can still be used for input; turn on **Settings > Rumble > Rumble on the phone too** to feel the rumble in the phone instead.
 >
-> Bluetooth-only controllers such as the 8BitDo Ultimate Mobile cannot be bridged: NeuroPad works over USB.
+> NeuroPad bridges controllers connected over USB (cable or USB-C). Bluetooth-only controllers are not supported.
 
 **Console / PC controllers with rumble motors (USB cable or USB-C adapter)**
 
