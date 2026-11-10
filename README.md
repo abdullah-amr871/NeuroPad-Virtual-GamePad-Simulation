@@ -1,4 +1,4 @@
-﻿<div align="center">
+<div align="center">
 
 <img src="docs/logo.svg" width="112" alt="NeuroPad logo">
 
@@ -105,22 +105,34 @@ Choose **Root** in the Connection tab and grant superuser access. No ADB, Wi-Fi 
 | :--- | :--- |
 | GameSir G8 Plus (MFi) | Works, rumble included (Nothing Phone 2, Android 16) |
 | Razer Kishi Ultra | Works (user report) |
-| GameSir X5 Lite | Not working yet (user report). Under investigation |
 | Other XInput USB gamepads | Should work. If your controller has a mode switch, set it to Xbox / XInput |
 
 ## Supported controllers (should work, not tested yet)
 
 These controllers support XInput (Xbox mode) over USB, so NeuroPad should work with them. If yours has a mode switch, set it to **Xbox / XInput / X-mode**.
 
+**Mobile (phone clamp) controllers with rumble motors**
+
 | Brand | Controllers |
 | :--- | :--- |
-| Microsoft | Xbox 360 wired controller, Xbox One controller, Xbox Series X/S controller, Xbox Elite Series 1 / 2 (USB cable) |
-| GameSir | G8 Galileo, X2 Pro (Xbox edition), X3 Pro, X4 Aileron, T4 Pro, T4 Kaleid, Nova Lite, Cyclone 2 (wired) |
-| Razer | Kishi V2 Pro, Kishi Ultra, Wolverine V2 / V2 Chroma / V3 |
-| 8BitDo | Ultimate (wired / 2.4G), Pro 2, SN30 Pro (wired), Ultimate C (wired) |
-| Flydigi | Vader 3 / Vader 3 Pro / Vader 4 Pro, Apex 4 (XInput mode) |
+| GameSir | G8 Plus, G8 Galileo, X2 Pro (Xbox edition), X3 Pro, X4 Aileron |
+| Razer | Kishi Ultra, Kishi V2 Pro, Kishi V3 Pro |
+| 8BitDo | Ultimate Mobile |
+| Backbone | Backbone Pro |
+| EasySMX | M20 |
+| abxylute | S9 |
+
+**Console / PC controllers with rumble motors (USB cable or USB-C adapter)**
+
+| Brand | Controllers |
+| :--- | :--- |
+| Microsoft | Xbox 360 wired controller, Xbox One controller, Xbox Series X/S controller, Xbox Elite Series 1 / 2 |
+| GameSir | T4 Pro, T4 Kaleid, Nova Lite, Cyclone 2 |
+| Razer | Wolverine V2 / V2 Chroma / V3 |
+| 8BitDo | Ultimate (wired / 2.4G), Ultimate C, Pro 2, SN30 Pro |
+| Flydigi | Vader 3 / Vader 3 Pro / Vader 4 Pro, Apex 4 |
 | PowerA / PDP | Wired controllers for Xbox, Rock Candy for Xbox |
-| Logitech | F310, F710 (switch on the back set to **X**) |
+| Logitech | F710 (switch on the back set to **X**) |
 | Others | Any USB gamepad that shows up as an Xbox 360 / Xbox One controller on a PC |
 
 Tried NeuroPad with another controller? Tell us in [Discussions](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/discussions) so it can be added here.
