@@ -1,6 +1,8 @@
 # Changelog
 
-## Unreleased
+## 2.0.4
+
+Confirmed on a Nothing Phone (2) with the GameSir G8 Plus (MFi).
 
 ### Added
 

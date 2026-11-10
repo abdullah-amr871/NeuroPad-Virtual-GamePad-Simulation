@@ -61,12 +61,12 @@ Works with **XInput (Xbox-mode) USB gamepads**. Confirmed on the **GameSir G8 Pl
 
 ## Download
 
-**[Download NeuroPad 2.0.2](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/releases/tag/v2.0.2)** &nbsp;·&nbsp; [all releases](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/releases)
+**[Download NeuroPad 2.0.4](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/releases/tag/v2.0.4)** &nbsp;·&nbsp; [all releases](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/releases)
 
 | File | Use it when |
 | :--- | :--- |
-| `NeuroPad_2.0.2_OneClick_Installer.zip` | You have a computer nearby. Installs everything with one double-click. |
-| `NeuroPad_2.0.2.apk` | You want to install straight on the phone (Android 11+, Wireless debugging). |
+| `NeuroPad_2.0.4_OneClick_Installer.zip` | You have a computer nearby. Installs everything with one double-click. |
+| `NeuroPad_2.0.4.apk` | You want to install straight on the phone (Android 11+, Wireless debugging). |
 
 ## Requirements
 
@@ -89,7 +89,7 @@ Android closes the ADB port when the phone reboots. Afterwards, connect it again
 
 ### Option B: on the phone only (Android 11+)
 
-1. Install `NeuroPad_2.0.2.apk`.
+1. Install `NeuroPad_2.0.4.apk`.
 2. Open the **Connection** tab, keep **Wireless debugging** selected and tap **Start pairing**.
 3. In Developer options, enable **Wireless debugging**, tap the text itself and choose **Pair device with pairing code**.
 4. Type the six digit code into the NeuroPad notification.
