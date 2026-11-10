@@ -12,7 +12,7 @@
 ## 2.0.1
 
 First version that was run on real hardware: a Nothing Phone (2) on Android 16 with a GameSir
-G8 Plus. Input, the virtual controller and rumble were confirmed there.
+G8 Plus (MFi). Input, the virtual controller and rumble were confirmed there.
 
 ### Fixed
 

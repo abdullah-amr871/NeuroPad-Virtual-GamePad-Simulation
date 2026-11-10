@@ -115,12 +115,11 @@ These controllers support XInput (Xbox mode) over USB, so NeuroPad should work w
 
 | Brand | Controllers |
 | :--- | :--- |
-| GameSir | G8 Plus, G8 Galileo, X2 Pro (Xbox edition), X3 Pro, X4 Aileron |
+| GameSir | G8 Plus (MFi), G8 Galileo, X2 Pro (Xbox edition), X3 Pro, X4 Aileron |
 | Razer | Kishi Ultra, Kishi V2 Pro, Kishi V3 Pro |
 | 8BitDo | Ultimate Mobile |
-| Backbone | Backbone Pro |
-| EasySMX | M20 |
-| abxylute | S9 |
+
+> NeuroPad passes rumble to the controller's motors, so the controller must have rumble motors. Check that yours lists rumble or vibration in its specs. Controllers without motors can still be used for input, but they cannot vibrate.
 
 **Console / PC controllers with rumble motors (USB cable or USB-C adapter)**
 
@@ -133,11 +132,11 @@ These controllers support XInput (Xbox mode) over USB, so NeuroPad should work w
 | Flydigi | Vader 3 / Vader 3 Pro / Vader 4 Pro, Apex 4 |
 | PowerA / PDP | Wired controllers for Xbox, Rock Candy for Xbox |
 | Logitech | F710 (switch on the back set to **X**) |
-| Others | Any USB gamepad that shows up as an Xbox 360 / Xbox One controller on a PC |
+| Others | Any USB gamepad with rumble motors that shows up as an Xbox 360 / Xbox One controller on a PC |
 
 Tried NeuroPad with another controller? Tell us in [Discussions](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/discussions) so it can be added here.
 
-> **Status of 2.0:** version 2.0 is a full rewrite. It has been run on one phone so far (Nothing Phone 2, Android 16, PC port 5555 mode) with the GameSir G8 Plus. Other phones, the Wireless debugging setup and root mode have not been tried on hardware yet. If something does not work for you, please [open an issue](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/issues) and attach the report from **Settings > Diagnostics > Share report**. [Version 1.0](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/releases/tag/v1.0.0) stays available.
+> **Status of 2.0:** version 2.0 is a full rewrite. It has been run on one phone so far (Nothing Phone 2, Android 16, PC port 5555 mode) with the GameSir G8 Plus (MFi). Other phones, the Wireless debugging setup and root mode have not been tried on hardware yet. If something does not work for you, please [open an issue](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/issues) and attach the report from **Settings > Diagnostics > Share report**. [Version 1.0](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/releases/tag/v1.0.0) stays available.
 
 Tried another controller? An issue that says whether buttons and rumble worked helps the list grow.
 
@@ -258,7 +257,7 @@ Bug reports, controller test results and pull requests are welcome. Please inclu
 NeuroPad is free and always will be. If it brought rumble back to your controller and you'd like to say thanks, you can buy me a coffee:
 
 - ☕ **Ko-fi:** [ko-fi.com/abdullahamr871](https://ko-fi.com/abdullahamr871)
-- 💙 **PayPal:** abdullah.amr.makky@outlook.com
+- 💙 **PayPal:** [paypal.me/abdullahamr871](https://paypal.me/abdullahamr871)
 
 A ⭐ on the repo helps just as much: it lets other people with the same problem find NeuroPad.
 
