@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NeuroPad: Fix USB Controller Rumble (Vibration) on Android, No Root</title>
+<meta name="description" content="USB gamepad not vibrating on Android? NeuroPad is a free, open-source app that brings rumble back to USB-C controllers like the GameSir G8 Plus and Razer Kishi Ultra. No root needed.">
+<link rel="canonical" href="https://abdullah-amr871.github.io/NeuroPad-Virtual-GamePad-Simulation/">
+<link rel="icon" href="logo.svg" type="image/svg+xml">
+<meta name="theme-color" content="#0A0E18">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="NeuroPad">
+<meta property="og:title" content="NeuroPad: Fix USB Controller Rumble on Android (No Root)">
+<meta property="og:description" content="Free, open-source app that makes USB gamepads vibrate in Android games again. Works with GameSir G8 Plus, Razer Kishi Ultra and other XInput controllers.">
+<meta property="og:url" content="https://abdullah-amr871.github.io/NeuroPad-Virtual-GamePad-Simulation/">
+<meta property="og:image" content="https://abdullah-amr871.github.io/NeuroPad-Virtual-GamePad-Simulation/social-preview.png">
+<meta property="og:image:width" content="1280">
+<meta property="og:image:height" content="640">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="NeuroPad: Fix USB Controller Rumble on Android (No Root)">
+<meta name="twitter:description" content="Free, open-source app that makes USB gamepads vibrate in Android games again.">
+<meta name="twitter:image" content="https://abdullah-amr871.github.io/NeuroPad-Virtual-GamePad-Simulation/social-preview.png">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "NeuroPad",
+  "operatingSystem": "Android 7.0+",
+  "applicationCategory": "UtilitiesApplication",
+  "description": "Brings rumble (vibration) back to USB gamepads on Android by showing games a virtual Xbox or PlayStation controller. No root needed.",
+  "url": "https://abdullah-amr871.github.io/NeuroPad-Virtual-GamePad-Simulation/",
+  "downloadUrl": "https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/releases/latest",
+  "softwareVersion": "2.0.4",
+  "license": "https://opensource.org/licenses/MIT",
+  "isAccessibleForFree": true,
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "author": { "@type": "Person", "name": "Abdullah Amr Maged", "url": "https://github.com/abdullah-amr871" },
+  "screenshot": "https://abdullah-amr871.github.io/NeuroPad-Virtual-GamePad-Simulation/screenshots/home.png"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "Why does my USB controller not vibrate on Android?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Android passes the buttons of most USB gamepads to games, but not rumble. NeuroPad fixes this by showing games a virtual Xbox or PlayStation controller that Android fully supports and sending every rumble back to the motors of your USB gamepad." } },
+    { "@type": "Question", "name": "Does NeuroPad need root?",
+      "acceptedAnswer": { "@type": "Answer", "text": "No. NeuroPad uses Android's Wireless debugging (Android 11+) or a one-click PC installer. Rooted phones are supported too, but root is optional." } },
+    { "@type": "Question", "name": "Which controllers work with NeuroPad?",
+      "acceptedAnswer": { "@type": "Answer", "text": "XInput (Xbox-mode) USB gamepads with rumble motors. Confirmed on the GameSir G8 Plus (MFi) and Razer Kishi Ultra; GameSir, Razer, 8BitDo, Flydigi and Xbox USB controllers should work too." } },
+    { "@type": "Question", "name": "My gamepad has no rumble motors. Can the phone vibrate instead?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes. Turn on Settings > Rumble > Rumble on the phone too, and game rumble also plays on the phone's own vibration motor." } },
+    { "@type": "Question", "name": "Is NeuroPad free and safe?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes. NeuroPad is free and open source (MIT), has no ads, needs no account and does not talk to the internet." } }
+  ]
+}
+</script>
+
+<style>
+:root{--bg:#0A0E18;--card:#131A2A;--line:#26304A;--text:#E8ECF5;--muted:#A3ACC0;--purple:#7C5CFF;--cyan:#22D3EE;--green:#34D399}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font:17px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,Inter,sans-serif;
+  background-image:radial-gradient(900px 600px at 85% -10%,#2B1F6B66,transparent 70%),radial-gradient(800px 500px at -10% 30%,#0E5E7A44,transparent 70%)}
+a{color:#B9A8FF}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+header.hero{padding:72px 0 40px;text-align:center}
+.hero img.logo{width:96px;height:96px}
+h1{font-size:clamp(32px,6vw,56px);line-height:1.1;margin:18px 0 14px;letter-spacing:-.02em}
+h1 .g{background:linear-gradient(90deg,#9D86FF,#22D3EE);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{font-size:clamp(18px,2.4vw,21px);color:var(--muted);max-width:760px;margin:0 auto}
+.cta{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin:30px 0 10px}
+.btn{display:inline-block;padding:14px 26px;border-radius:999px;font-weight:700;text-decoration:none}
+.btn.primary{background:linear-gradient(135deg,#7C5CFF,#22B8E0);color:#fff}
+.btn.ghost{border:1.5px solid var(--line);color:var(--text)}
+.chips{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:18px}
+.chip{font-size:14px;padding:6px 14px;border-radius:999px;background:#1B2438;border:1px solid var(--line)}
+.chip.ok{color:var(--green);border-color:#1F5A4B;background:#0F2A26}
+.shots{display:flex;gap:14px;justify-content:safe center;margin:34px 0 10px;overflow-x:auto;padding-bottom:6px}
+.shots img{width:200px;border-radius:22px;border:6px solid #1C2336;flex:none}
+section{padding:40px 0}
+h2{font-size:clamp(26px,4vw,34px);margin:0 0 18px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:22px}
+.card h3{margin:0 0 6px;font-size:19px}
+.card p{margin:0;color:var(--muted)}
+ol.steps{padding-left:22px}
+ol.steps li{margin-bottom:10px}
+details{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 20px;margin-bottom:12px}
+summary{cursor:pointer;font-weight:700}
+details p{color:var(--muted);margin:10px 0 0}
+table{width:100%;border-collapse:collapse}
+td,th{text-align:left;padding:10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:600}
+footer{padding:40px 0 60px;color:var(--muted);font-size:14px;text-align:center}
+</style>
+</head>
+<body>
+<header class="hero wrap">
+  <img class="logo" src="logo.svg" alt="NeuroPad logo">
+  <h1>USB controller <span class="g">not vibrating</span> on Android? NeuroPad fixes it.</h1>
+  <p class="lead">Plug a USB-C gamepad into your phone and the buttons work, but the rumble never does. NeuroPad is a free, open-source app that brings controller vibration back to Android games. No root needed.</p>
+  <div class="cta">
+    <a class="btn primary" href="https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/releases/latest">Download NeuroPad (free)</a>
+    <a class="btn ghost" href="https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation">View on GitHub</a>
+  </div>
+  <div class="chips">
+    <span class="chip ok">No root</span><span class="chip">Android 7.0+</span><span class="chip">Free &amp; open source</span><span class="chip">No ads, no account</span>
+  </div>
+  <div class="shots">
+    <img src="screenshots/home.png" alt="NeuroPad home screen with the bridge active and rumble meters" loading="lazy">
+    <img src="screenshots/controller.png" alt="NeuroPad live controller view" loading="lazy">
+    <img src="screenshots/settings.png" alt="NeuroPad rumble settings" loading="lazy">
+  </div>
+</header>
+
+<main class="wrap">
+  <section id="problem">
+    <h2>Why USB gamepads don't rumble on Android</h2>
+    <p>Android passes the buttons and sticks of most USB controllers to games, but it does not pass <strong>rumble</strong> on to them. Games ask the controller to vibrate and the motors never get the message. That's why a GameSir G8, Razer Kishi or Xbox controller plugged in over USB feels dead in games that support vibration.</p>
+    <p>NeuroPad shows your games a <strong>virtual wireless controller</strong> (Xbox or PlayStation) that Android fully supports, feeds it with your real USB gamepad, and sends every rumble the game produces back to your gamepad's motors, within a few milliseconds.</p>
+  </section>
+
+  <section id="features">
+    <h2>What NeuroPad does</h2>
+    <div class="grid">
+      <div class="card"><h3>Rumble over USB</h3><p>Game vibration plays on your gamepad's heavy and light motors.</p></div>
+      <div class="card"><h3>No root needed</h3><p>Set up with Wireless debugging on the phone (Android 11+) or a one-click PC installer. Root works too.</p></div>
+      <div class="card"><h3>5 controller profiles</h3><p>Appear as Xbox 360, Xbox One, Xbox Series, DualShock 4 or DualSense, with matching button prompts.</p></div>
+      <div class="card"><h3>Rumble on the phone too</h3><p>Optionally play game rumble on the phone's own vibration, for gamepads without motors.</p></div>
+      <div class="card"><h3>Phone-vibration mirroring</h3><p>For games that only vibrate the phone, that vibration is sent to your gamepad.</p></div>
+      <div class="card"><h3>Remapping &amp; diagnostics</h3><p>Nintendo or custom layouts, back paddles, a live controller view and a rumble test.</p></div>
+    </div>
+  </section>
+
+  <section id="controllers">
+    <h2>Supported controllers</h2>
+    <p>NeuroPad works with <strong>XInput (Xbox-mode) USB gamepads that have rumble motors</strong>. If your controller has a mode switch, set it to Xbox / XInput.</p>
+    <table>
+      <tr><th>Status</th><th>Controllers</th></tr>
+      <tr><td>Confirmed</td><td>GameSir G8 Plus (MFi) (Nothing Phone 2, Android 16), Razer Kishi Ultra</td></tr>
+      <tr><td>Should work</td><td>GameSir G8 Galileo, X2 Pro, X3 Pro, X4 Aileron, T4 Pro, Cyclone 2 &middot; Razer Kishi V2 Pro, Kishi V3 Pro, Wolverine V2 / V3 &middot; 8BitDo Ultimate (wired / 2.4G), Ultimate C, Pro 2, SN30 Pro &middot; Flydigi Vader 3 / 4 Pro, Apex 4 &middot; Xbox 360, Xbox One, Xbox Series X|S and Elite controllers over USB</td></tr>
+    </table>
+  </section>
+
+  <section id="setup">
+    <h2>How to set it up</h2>
+    <ol class="steps">
+      <li><a href="https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/releases/latest">Download the latest release</a>: the APK for the phone, or the One-Click Installer if you have a computer nearby.</li>
+      <li>Give NeuroPad system access once: pair with <strong>Wireless debugging</strong> on Android 11+, run the PC installer, or grant root.</li>
+      <li>Plug in your USB gamepad, open NeuroPad and tap the power button. Games now see a controller that can rumble.</li>
+    </ol>
+    <p>Full instructions are in the <a href="https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation#set-up">README</a>.</p>
+  </section>
+
+  <section id="faq">
+    <h2>FAQ</h2>
+    <details open><summary>Why does my USB controller not vibrate on Android?</summary><p>Android passes the buttons of most USB gamepads to games, but not rumble. NeuroPad fixes this by showing games a virtual Xbox or PlayStation controller that Android fully supports and sending every rumble back to your USB gamepad's motors.</p></details>
+    <details><summary>Does NeuroPad need root?</summary><p>No. It uses Wireless debugging (Android 11+) or a one-click PC installer. Root is optional.</p></details>
+    <details><summary>Does it work with my GameSir G8 / Razer Kishi?</summary><p>The GameSir G8 Plus (MFi) and Razer Kishi Ultra are confirmed. Other XInput USB controllers with rumble motors should work; set the mode switch to Xbox / XInput.</p></details>
+    <details><summary>My gamepad has no rumble motors. Can the phone vibrate instead?</summary><p>Yes. Turn on Settings &gt; Rumble &gt; Rumble on the phone too.</p></details>
+    <details><summary>Does it work with Bluetooth controllers?</summary><p>No. NeuroPad bridges controllers connected over USB. Bluetooth controllers usually have working rumble on Android already.</p></details>
+    <details><summary>Is it free and safe?</summary><p>Yes. NeuroPad is open source (MIT), has no ads, needs no account and does not talk to the internet.</p></details>
+  </section>
+</main>
+
+<footer class="wrap">
+  <p><a href="https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation">NeuroPad on GitHub</a> &middot; MIT License &middot; &copy; Abdullah Amr Maged</p>
+  <p>Xbox, PlayStation, DualShock, DualSense, GameSir, Razer, 8BitDo and Flydigi are trademarks of their respective owners. NeuroPad is not affiliated with or endorsed by any of them.</p>
+</footer>
+</body>
+</html>
