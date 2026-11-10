@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Link
 import androidx.compose.material.icons.rounded.SportsEsports
@@ -52,6 +53,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.abdullahamr871.neuropad.bridge.AccessMode
@@ -91,12 +93,14 @@ class MainActivity : ComponentActivity() {
                     "Controller" to Icons.Rounded.SportsEsports,
                     "Connection" to Icons.Rounded.Link,
                     "Settings" to Icons.Rounded.Tune,
+                    "Support" to Icons.Rounded.Favorite,
                 )
                 val screen: @Composable () -> Unit = {
                     when (tab) {
                         AppViewModel.TAB_HOME -> HomeScreen(vm, onStart = ::startBridge) { tab = it }
                         AppViewModel.TAB_CONTROLLER -> ControllerScreen(vm)
                         AppViewModel.TAB_CONNECTION -> ConnectionScreen(vm)
+                        AppViewModel.TAB_SUPPORT -> SupportScreen(vm)
                         else -> SettingsScreen(vm, onQuit = ::quit)
                     }
                 }
@@ -111,7 +115,7 @@ class MainActivity : ComponentActivity() {
                                     selected = tab == index,
                                     onClick = { tab = index },
                                     icon = { Icon(icon, contentDescription = label) },
-                                    label = { Text(label) },
+                                    label = { Text(label, fontSize = 11.sp, maxLines = 1, softWrap = false) },
                                     colors = NavigationRailItemDefaults.colors(
                                         indicatorColor = Np.Violet.copy(alpha = 0.25f),
                                         selectedIconColor = Np.Text,
@@ -135,7 +139,7 @@ class MainActivity : ComponentActivity() {
                                         selected = tab == index,
                                         onClick = { tab = index },
                                         icon = { Icon(icon, contentDescription = label) },
-                                        label = { Text(label) },
+                                        label = { Text(label, fontSize = 11.sp, maxLines = 1, softWrap = false) },
                                         colors = NavigationBarItemDefaults.colors(
                                             indicatorColor = Np.Violet.copy(alpha = 0.25f),
                                             selectedIconColor = Np.Text,

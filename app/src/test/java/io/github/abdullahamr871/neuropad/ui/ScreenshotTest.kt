@@ -1,4 +1,4 @@
-package io.github.abdullahamr871.neuropad.ui
+﻿package io.github.abdullahamr871.neuropad.ui
 
 import android.app.Application
 import androidx.compose.foundation.background
@@ -36,7 +36,7 @@ import org.robolectric.annotation.GraphicsMode
 @RunWith(RobolectricTestRunner::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @ConscryptMode(ConscryptMode.Mode.OFF) // the app ships its own Conscrypt for Android only
-@Config(sdk = [34], qualifiers = "w412dp-h1060dp-xhdpi")
+@Config(sdk = [34], qualifiers = "w412dp-h1180dp-xhdpi")
 class ScreenshotTest {
     private lateinit var vm: AppViewModel
 
@@ -92,6 +92,14 @@ class ScreenshotTest {
     fun connection() = shot("connection") { ConnectionScreen(vm) }
 
     @Test
+    @Config(qualifiers = "w412dp-h1000dp-xhdpi")
+    fun support() = shot("support") { SupportScreen(vm) }
+
+    @Test
+    @Config(qualifiers = "w820dp-h370dp-land-xhdpi")
+    fun supportLandscape() = shot("support_landscape") { SupportScreen(vm) }
+
+    @Test
     @Config(qualifiers = "w412dp-h1180dp-xhdpi")
-    fun settings() = shot("settings") { SettingsScreen(vm, onQuit = {}) }
+    fun settings()= shot("settings") { SettingsScreen(vm, onQuit = {}) }
 }

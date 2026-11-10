@@ -417,6 +417,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         const val TAB_CONTROLLER = 1
         const val TAB_CONNECTION = 2
         const val TAB_SETTINGS = 3
+        const val TAB_SUPPORT = 4
 
         const val REPO_URL = "https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation"
         const val KOFI_URL = "https://ko-fi.com/abdullahamr871"

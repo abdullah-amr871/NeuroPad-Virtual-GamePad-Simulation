@@ -215,6 +215,8 @@ fun HomeScreen(vm: AppViewModel, onStart: () -> Unit, onNavigate: (Int) -> Unit)
                 }
             }
         }
+
+        SupportBanner { onNavigate(AppViewModel.TAB_SUPPORT) }
     })
 }
 
