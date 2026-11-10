@@ -16,7 +16,7 @@
 
 Plug a USB-C gamepad into an Android phone and the buttons work, but the **vibration never does**: Android does not pass rumble on to most USB controllers. NeuroPad fixes that. It shows games a **virtual wireless controller** (Xbox or PlayStation) that Android fully supports, feeds it with your USB gamepad, and sends every rumble the game produces back to the motors of the real pad.
 
-Built for, and tested on, the **GameSir G8 Plus (MFi)**.
+Works with **XInput (Xbox-mode) USB gamepads**. Confirmed on the **GameSir G8 Plus (MFi)** and the **Razer Kishi Ultra**.
 
 <p align="center">
   <img src="docs/screenshots/home.png" width="24%" alt="Home screen">
@@ -102,8 +102,12 @@ Choose **Root** in the Connection tab and grant superuser access. No ADB, Wi-Fi 
 
 | Controller | Status |
 | :--- | :--- |
-| GameSir G8 Plus (MFi) | Tested, rumble included (Nothing Phone 2, Android 16) |
-| Other XInput USB gamepads | Not tested yet. They should work, but nothing is promised |
+| GameSir G8 Plus (MFi) | Works, rumble included (Nothing Phone 2, Android 16) |
+| Razer Kishi Ultra | Works (user report) |
+| GameSir X5 Lite | Not working yet (user report). Under investigation |
+| Other XInput USB gamepads | Should work. If your controller has a mode switch, set it to Xbox / XInput |
+
+Tried NeuroPad with another controller? Tell us in [Discussions](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/discussions) so it can be added here.
 
 > **Status of 2.0:** version 2.0 is a full rewrite. It has been run on one phone so far (Nothing Phone 2, Android 16, PC port 5555 mode) with the GameSir G8 Plus. Other phones, the Wireless debugging setup and root mode have not been tried on hardware yet. If something does not work for you, please [open an issue](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/issues) and attach the report from **Settings > Diagnostics > Share report**. [Version 1.0](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/releases/tag/v1.0.0) stays available.
 
