@@ -44,11 +44,29 @@ ok "Using adb: $ADB"
 [ -f "$APK" ] || die "NeuroPad.apk is missing. Extract the whole ZIP and run the script from that folder."
 
 # ---- 2. device ------------------------------------------------------------
+# With several devices attached (the same phone over USB and Wi-Fi, an emulator, ...) adb
+# refuses to guess. Pick the USB one and use it for every command.
+select_device() {
+    local i ready usb
+    for i in $(seq 1 60); do
+        ready="$("$ADB" devices | tr -d '\r' | awk -F'\t' '$2=="device"{print $1}')"
+        usb="$(printf '%s\n' "$ready" | grep -v ':' | grep -v '^emulator-' | grep -v '^$')"
+        if [ "$(printf '%s\n' "$usb" | grep -c .)" -eq 1 ]; then printf '%s' "$usb"; return 0; fi
+        if [ "$(printf '%s\n' "$usb" | grep -c .)" -gt 1 ]; then return 2; fi
+        if [ "$(printf '%s\n' "$ready" | grep -c .)" -eq 1 ]; then printf '%s' "$ready"; return 0; fi
+        sleep 1
+    done
+    return 1
+}
+
 info "[1/5] Waiting for the phone..."
 "$ADB" start-server >/dev/null 2>&1
-"$ADB" wait-for-device || die "No device found."
-STATE="$("$ADB" get-state 2>/dev/null | tr -d '\r')"
-[ "$STATE" = "device" ] || die "The phone is '$STATE'. Unlock it and allow USB debugging, then run this again."
+ANDROID_SERIAL="$(select_device)"
+case $? in
+    0) export ANDROID_SERIAL ;;
+    2) die "More than one phone is connected by USB. Unplug the others and run this again." ;;
+    *) die "No phone was found. Check the cable, unlock the phone and allow USB debugging." ;;
+esac
 MODEL="$("$ADB" shell getprop ro.product.model | tr -d '\r')"
 ABI="$("$ADB" shell getprop ro.product.cpu.abi | tr -d '\r')"
 ok "Connected: $MODEL ($ABI)"

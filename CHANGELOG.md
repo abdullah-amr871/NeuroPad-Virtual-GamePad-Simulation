@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.0.2
+
+### Fixed
+
+- **Installer stopped with "more than one device/emulator".** When the phone was listed
+  twice (USB and Wi-Fi ADB) or an emulator was running, `adb` refused to pick one and the
+  installer reported a confusing empty phone state. The installer and the port activator
+  now choose the USB device themselves and wait for the "Allow" prompt.
+
 ## 2.0.1
 
 First version that was run on real hardware: a Nothing Phone (2) on Android 16 with a GameSir

@@ -14,7 +14,21 @@ if [ -z "$ADB" ]; then
 fi
 
 echo "Connect the phone with USB debugging enabled..."
-"$ADB" wait-for-device
+"$ADB" start-server >/dev/null 2>&1
+# Use the USB device even when the phone is also listed over Wi-Fi.
+SERIAL=""
+for _ in $(seq 1 60); do
+    READY="$("$ADB" devices | tr -d '\r' | awk -F'\t' '$2=="device"{print $1}')"
+    SERIAL="$(printf '%s\n' "$READY" | grep -v ':' | grep -v '^emulator-' | grep . | head -n 1)"
+    [ -z "$SERIAL" ] && [ "$(printf '%s\n' "$READY" | grep -c .)" -eq 1 ] && SERIAL="$READY"
+    [ -n "$SERIAL" ] && break
+    sleep 1
+done
+if [ -z "$SERIAL" ]; then
+    echo "[ERROR] No phone was found. Check the cable and that USB debugging is allowed."
+    exit 1
+fi
+export ANDROID_SERIAL="$SERIAL"
 "$ADB" tcpip 5555 >/dev/null 2>&1
 sleep 3
 "$ADB" wait-for-device
