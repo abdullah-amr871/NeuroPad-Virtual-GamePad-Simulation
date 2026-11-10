@@ -1,0 +1,219 @@
+1
+00:00:00,650 --> 00:00:03,521
+You plug a USB gamepad into your Android phone.
+
+2
+00:00:03,521 --> 00:00:04,687
+The buttons work.
+
+3
+00:00:04,687 --> 00:00:05,624
+But the rumble?
+
+4
+00:00:05,624 --> 00:00:06,333
+Nothing.
+
+5
+00:00:06,333 --> 00:00:09,098
+If that sounds familiar, this video is for you.
+
+6
+00:00:09,098 --> 00:00:15,480
+Meet NeuroPad: a free, open source app that brings rumble back to USB gamepads on Android.
+
+7
+00:00:15,480 --> 00:00:16,778
+And you don't need root.
+
+8
+00:00:18,350 --> 00:00:19,346
+Here's the problem.
+
+9
+00:00:19,346 --> 00:00:28,769
+When you connect a USB-C gamepad to an Android phone, Android passes the buttons through just fine, but it doesn't pass rumble on to most USB controllers.
+
+10
+00:00:28,769 --> 00:00:33,228
+So the game asks your controller to vibrate, and the motors never get the message.
+
+11
+00:00:34,817 --> 00:00:37,303
+NeuroPad fixes this with a simple idea.
+
+12
+00:00:37,303 --> 00:00:43,505
+It shows your games a virtual wireless controller, an Xbox or PlayStation pad that Android fully supports.
+
+13
+00:00:43,505 --> 00:00:46,894
+Your real USB gamepad drives that virtual controller.
+
+14
+00:00:46,894 --> 00:00:53,685
+And every rumble the game produces is sent straight back to the motors in your real pad, within a few milliseconds.
+
+15
+00:00:55,283 --> 00:00:58,539
+And the best part: this is confirmed on real hardware.
+
+16
+00:00:58,539 --> 00:01:04,692
+NeuroPad was tested on a Nothing Phone 2 running Android 16, with a GameSir G8 Plus.
+
+17
+00:01:04,692 --> 00:01:08,046
+Input, the virtual controller, and rumble all work.
+
+18
+00:01:08,046 --> 00:01:11,123
+Users report the Razer Kishi Ultra working too.
+
+19
+00:01:11,123 --> 00:01:12,553
+The problem is fixed.
+
+20
+00:01:14,150 --> 00:01:15,518
+Let's take a look at the app.
+
+21
+00:01:15,518 --> 00:01:19,028
+The Home screen has one big power button that starts the bridge.
+
+22
+00:01:19,028 --> 00:01:24,845
+A checklist shows system access, your USB gamepad, and the virtual controller at a glance.
+
+23
+00:01:24,845 --> 00:01:30,963
+You choose which controller games should see, and live meters show the heavy and light motors as they rumble.
+
+24
+00:01:30,963 --> 00:01:33,956
+You can even test each motor without opening a game.
+
+25
+00:01:35,583 --> 00:01:43,779
+There are five controller profiles: Xbox 360, Xbox One, Xbox Series, DualShock 4, and DualSense.
+
+26
+00:01:43,779 --> 00:01:45,846
+Games show the matching button prompts.
+
+27
+00:01:45,846 --> 00:01:49,944
+If one game doesn't rumble with one profile, simply try another.
+
+28
+00:01:51,550 --> 00:01:57,690
+The Controller tab shows your input live: sticks, triggers and buttons, exactly as they arrive.
+
+29
+00:01:57,690 --> 00:02:02,738
+You can switch to a Nintendo layout or build a fully custom one, including back paddles.
+
+30
+00:02:02,738 --> 00:02:07,966
+And the bridge statistics show how fast it is: about a fifth of a millisecond per packet.
+
+31
+00:02:09,550 --> 00:02:15,666
+To create a virtual controller, NeuroPad needs the rights of Android's shell user, but not root.
+
+32
+00:02:15,666 --> 00:02:23,142
+On Android 11 or newer, pair once with Wireless debugging and the app sets everything up by itself, no computer required.
+
+33
+00:02:23,142 --> 00:02:27,036
+On any Android version, the one-click PC installer does the job.
+
+34
+00:02:27,036 --> 00:02:28,959
+And rooted phones are supported too.
+
+35
+00:02:28,959 --> 00:02:35,642
+Nothing ever leaves your phone: the app only talks to itself, on 127.0.0.1.
+
+36
+00:02:37,250 --> 00:02:43,618
+In Settings, you can tune the rumble strength, and stretch very short pulses so small effects are actually felt.
+
+37
+00:02:43,618 --> 00:02:48,041
+Ignore system vibration keeps keyboard taps from shaking your controller.
+
+38
+00:02:48,041 --> 00:02:53,426
+And for games that only vibrate the phone, NeuroPad can mirror that vibration to your gamepad.
+
+39
+00:02:55,017 --> 00:03:00,796
+Version 2 is a complete open source rewrite, and it fixes the problems people ran into before.
+
+40
+00:03:00,796 --> 00:03:04,041
+Long rumbles are no longer cut off after half a second.
+
+41
+00:03:04,041 --> 00:03:07,286
+Rumble no longer goes missing after a notification.
+
+42
+00:03:07,286 --> 00:03:11,000
+Launcher taps and keyboard clicks no longer shake the gamepad.
+
+43
+00:03:11,000 --> 00:03:15,219
+Short effects are no longer weak, and long rumbles no longer stutter.
+
+44
+00:03:16,817 --> 00:03:22,644
+NeuroPad works with XInput, or Xbox mode, USB gamepads that have rumble motors.
+
+45
+00:03:22,644 --> 00:03:29,062
+That covers many controllers from GameSir, Razer, 8BitDo, Flydigi, and Microsoft.
+
+46
+00:03:29,062 --> 00:03:33,281
+If your controller has a mode switch, set it to Xbox or XInput.
+
+47
+00:03:34,883 --> 00:03:42,622
+To get NeuroPad, open the GitHub repository, NeuroPad Virtual GamePad Simulation, and download the latest release.
+
+48
+00:03:42,622 --> 00:03:49,545
+Use the one-click installer if you have a computer nearby, or install the APK straight on the phone on Android 11 and up.
+
+49
+00:03:49,545 --> 00:03:53,499
+Then plug in your gamepad, open NeuroPad, and tap the power button.
+
+50
+00:03:53,499 --> 00:03:54,220
+That's it.
+
+51
+00:03:55,817 --> 00:03:59,589
+NeuroPad is free, has no ads, and needs no account.
+
+52
+00:03:59,589 --> 00:04:07,606
+If it brought rumble back to your controller, a star on GitHub helps other people find it, and you can support development on Ko-fi or PayPal.
+
+53
+00:04:07,606 --> 00:04:09,240
+Tried it with another controller?
+
+54
+00:04:09,240 --> 00:04:10,598
+Tell us in the comments.
+
+55
+00:04:10,598 --> 00:04:11,704
+Thanks for watching!
