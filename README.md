@@ -1,4 +1,4 @@
-<div align="center">
+﻿<div align="center">
 
 <img src="docs/logo.svg" width="112" alt="NeuroPad logo">
 
@@ -36,6 +36,7 @@ Works with **XInput (Xbox-mode) USB gamepads**. Confirmed on the **GameSir G8 Pl
 - [Download](#download)
 - [Set up](#set-up)
 - [Tested controllers](#tested-controllers)
+- [Supported controllers](#supported-controllers-should-work-not-tested-yet)
 - [Controller profiles](#controller-profiles)
 - [How it works](#how-it-works)
 - [What is new in 2.0](#what-is-new-in-20)
@@ -58,7 +59,7 @@ Works with **XInput (Xbox-mode) USB gamepads**. Confirmed on the **GameSir G8 Pl
 
 ## Download
 
-**[Download NeuroPad 2.0.2](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/releases/tag/v2.0.2)** &nbsp;·&nbsp; [all releases](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/releases)
+**[Download NeuroPad 2.0.2](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/releases/tag/v2.0.2)** &nbsp;Â·&nbsp; [all releases](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/releases)
 
 | File | Use it when |
 | :--- | :--- |
@@ -106,6 +107,21 @@ Choose **Root** in the Connection tab and grant superuser access. No ADB, Wi-Fi 
 | Razer Kishi Ultra | Works (user report) |
 | GameSir X5 Lite | Not working yet (user report). Under investigation |
 | Other XInput USB gamepads | Should work. If your controller has a mode switch, set it to Xbox / XInput |
+
+## Supported controllers (should work, not tested yet)
+
+These controllers support XInput (Xbox mode) over USB, so NeuroPad should work with them. If yours has a mode switch, set it to **Xbox / XInput / X-mode**.
+
+| Brand | Controllers |
+| :--- | :--- |
+| Microsoft | Xbox 360 wired controller, Xbox One controller, Xbox Series X/S controller, Xbox Elite Series 1 / 2 (USB cable) |
+| GameSir | G8 Galileo, X2 Pro (Xbox edition), X3 Pro, X4 Aileron, T4 Pro, T4 Kaleid, Nova Lite, Cyclone 2 (wired) |
+| Razer | Kishi V2 Pro, Kishi Ultra, Wolverine V2 / V2 Chroma / V3 |
+| 8BitDo | Ultimate (wired / 2.4G), Pro 2, SN30 Pro (wired), Ultimate C (wired) |
+| Flydigi | Vader 3 / Vader 3 Pro / Vader 4 Pro, Apex 4 (XInput mode) |
+| PowerA / PDP | Wired controllers for Xbox, Rock Candy for Xbox |
+| Logitech | F310, F710 (switch on the back set to **X**) |
+| Others | Any USB gamepad that shows up as an Xbox 360 / Xbox One controller on a PC |
 
 Tried NeuroPad with another controller? Tell us in [Discussions](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/discussions) so it can be added here.
 
@@ -227,6 +243,6 @@ Bug reports, controller test results and pull requests are welcome. Please inclu
 
 ## License
 
-[MIT](LICENSE) © Abdullah Amr Maged.
+[MIT](LICENSE) Â© Abdullah Amr Maged.
 
 Xbox, PlayStation, DualShock, DualSense and GameSir are trademarks of their respective owners. NeuroPad is not affiliated with or endorsed by any of them.
