@@ -51,11 +51,27 @@ Ok "Using adb: $Adb"
 if (-not (Test-Path $Apk)) { Die 'NeuroPad.apk is missing. Extract the whole ZIP and run the installer from that folder.' }
 
 # ---- 2. device ------------------------------------------------------------
+# With several devices attached (for example the same phone over USB and over Wi-Fi, or an
+# emulator) adb refuses to guess. Pick the USB one and use it for every command.
+function Select-Device {
+    for ($i = 0; $i -lt 60; $i++) {
+        $lines = (& $Adb devices | Out-String) -split "`r?`n" | Where-Object { $_ -match "`t" }
+        $ready = @($lines | Where-Object { $_ -match "`tdevice$" } | ForEach-Object { ($_ -split "`t")[0] })
+        $usb = @($ready | Where-Object { $_ -notmatch ':' -and $_ -notmatch '^emulator-' })
+        if ($usb.Count -eq 1) { return $usb[0] }
+        if ($usb.Count -gt 1) { Die "More than one phone is connected by USB. Unplug the others and run this again." }
+        if ($ready.Count -eq 1) { return $ready[0] }
+        if ($lines | Where-Object { $_ -match "`tunauthorized$" }) {
+            if ($i -eq 0) { Warn 'Tap "Allow" on the phone to authorise this computer...' }
+        }
+        Start-Sleep -Seconds 1
+    }
+    Die 'No phone was found. Check the cable (it must be a data cable) and that USB debugging is enabled.'
+}
+
 Info '[1/5] Waiting for the phone...'
 & $Adb start-server 2>$null | Out-Null
-& $Adb wait-for-device
-$state = (& $Adb get-state 2>$null | Out-String).Trim()
-if ($state -ne 'device') { Die "The phone is '$state'. Unlock it and allow USB debugging, then run the installer again." }
+$env:ANDROID_SERIAL = Select-Device
 $model = (& $Adb shell getprop ro.product.model | Out-String).Trim()
 $abi   = (& $Adb shell getprop ro.product.cpu.abi | Out-String).Trim()
 Ok "Connected: $model ($abi)"

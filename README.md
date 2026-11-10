@@ -58,12 +58,12 @@ Built for, and tested on, the **GameSir G8 Plus (MFi)**.
 
 ## Download
 
-**[Download NeuroPad 2.0.1](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/releases/tag/v2.0.1)** &nbsp;·&nbsp; [all releases](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/releases)
+**[Download NeuroPad 2.0.2](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/releases/tag/v2.0.2)** &nbsp;·&nbsp; [all releases](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/releases)
 
 | File | Use it when |
 | :--- | :--- |
-| `NeuroPad_2.0.1_OneClick_Installer.zip` | You have a computer nearby. Installs everything with one double-click. |
-| `NeuroPad_2.0.1.apk` | You want to install straight on the phone (Android 11+, Wireless debugging). |
+| `NeuroPad_2.0.2_OneClick_Installer.zip` | You have a computer nearby. Installs everything with one double-click. |
+| `NeuroPad_2.0.2.apk` | You want to install straight on the phone (Android 11+, Wireless debugging). |
 
 ## Requirements
 
@@ -86,7 +86,7 @@ Android closes the ADB port when the phone reboots. Afterwards, connect it again
 
 ### Option B: on the phone only (Android 11+)
 
-1. Install `NeuroPad_2.0.1.apk`.
+1. Install `NeuroPad_2.0.2.apk`.
 2. Open the **Connection** tab, keep **Wireless debugging** selected and tap **Start pairing**.
 3. In Developer options, enable **Wireless debugging**, tap the text itself and choose **Pair device with pairing code**.
 4. Type the six digit code into the NeuroPad notification.
