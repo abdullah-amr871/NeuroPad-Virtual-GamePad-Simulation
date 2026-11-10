@@ -24,8 +24,8 @@ android {
         applicationId = "io.github.abdullahamr871.neuropad"
         minSdk = 24
         targetSdk = 34
-        versionCode = 20002
-        versionName = "2.0.2"
+        versionCode = 20003
+        versionName = "2.0.3"
         vectorDrawables.useSupportLibrary = true
         // The bundled uinput_proto daemon is a 64-bit ARM binary, so other ABIs cannot work.
         ndk { abiFilters += "arm64-v8a" }

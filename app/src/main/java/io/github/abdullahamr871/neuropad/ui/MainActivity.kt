@@ -53,6 +53,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.abdullahamr871.neuropad.bridge.AccessMode
@@ -114,7 +115,7 @@ class MainActivity : ComponentActivity() {
                                     selected = tab == index,
                                     onClick = { tab = index },
                                     icon = { Icon(icon, contentDescription = label) },
-                                    label = { Text(label) },
+                                    label = { Text(label, fontSize = 11.sp, maxLines = 1, softWrap = false) },
                                     colors = NavigationRailItemDefaults.colors(
                                         indicatorColor = Np.Violet.copy(alpha = 0.25f),
                                         selectedIconColor = Np.Text,
@@ -138,7 +139,7 @@ class MainActivity : ComponentActivity() {
                                         selected = tab == index,
                                         onClick = { tab = index },
                                         icon = { Icon(icon, contentDescription = label) },
-                                        label = { Text(label) },
+                                        label = { Text(label, fontSize = 11.sp, maxLines = 1, softWrap = false) },
                                         colors = NavigationBarItemDefaults.colors(
                                             indicatorColor = Np.Violet.copy(alpha = 0.25f),
                                             selectedIconColor = Np.Text,

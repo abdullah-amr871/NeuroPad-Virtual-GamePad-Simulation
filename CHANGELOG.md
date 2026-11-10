@@ -1,5 +1,18 @@
 # Changelog
 
+## 2.0.3
+
+### Added
+
+- **Support tab.** A new tab with Ko-fi and PayPal donation links, what donations pay for,
+  and free ways to help (starring the repo, reporting your controller). A small card on the
+  Home screen leads to it.
+
+### Fixed
+
+- **Bottom bar labels wrapped onto two lines** (for example "Connection") on narrow phones.
+  Labels now always stay on one line.
+
 ## 2.0.2
 
 ### Fixed
