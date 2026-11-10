@@ -11,6 +11,7 @@
 [![Android](https://img.shields.io/badge/Android-7.0%2B-34D399?logo=android&logoColor=white)](#requirements)
 [![Root](https://img.shields.io/badge/root-not%20required-22D3EE)](#how-it-gets-system-access)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+[![XERJ Corpus Hub contributor](https://hub.xerj.org/contributors/abdullah-amr871/badge.svg)](https://hub.xerj.org/contributors/abdullah-amr871)
 
 </div>
 
