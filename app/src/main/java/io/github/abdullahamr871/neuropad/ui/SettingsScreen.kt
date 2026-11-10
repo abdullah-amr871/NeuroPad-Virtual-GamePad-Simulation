@@ -111,6 +111,28 @@ fun SettingsScreen(vm: AppViewModel, onQuit: () -> Unit) {
         }
 
     }, second = {
+        Panel(title = "Support NeuroPad 💙") {
+            Text("NeuroPad is free and open source.", fontWeight = FontWeight.SemiBold)
+            Hint(
+                "If it brought rumble back to your controller, a small donation helps me buy more " +
+                    "controllers to test and keep improving the app."
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Button(
+                    onClick = { vm.openUrl(AppViewModel.KOFI_URL) },
+                    colors = ButtonDefaults.buttonColors(containerColor = Np.Cyan, contentColor = Np.Background),
+                    modifier = Modifier.weight(1f),
+                ) { Text("☕ Ko-fi") }
+                Button(
+                    onClick = { vm.openUrl(AppViewModel.PAYPAL_URL) },
+                    modifier = Modifier.weight(1f),
+                ) { Text("PayPal") }
+            }
+            OutlinedButton(onClick = { vm.openUrl(AppViewModel.REPO_URL) }, modifier = Modifier.fillMaxWidth()) {
+                Text("⭐ Star on GitHub (free)")
+            }
+        }
+
         Panel(title = "Background") {
             StatusRow(
                 "Battery optimisation",
