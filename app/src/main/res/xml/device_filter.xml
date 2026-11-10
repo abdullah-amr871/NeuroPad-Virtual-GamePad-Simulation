@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Devices that offer to open NeuroPad when plugged in (same list as 1.0). -->
+<resources>
+    <!-- Xbox 360 wired controller and anything exposing an XInput interface -->
+    <usb-device vendor-id="1118" product-id="654" />
+    <usb-device class="255" subclass="93" protocol="1" />
+    <usb-device class="255" subclass="93" protocol="129" />
+    <!-- GameSir -->
+    <usb-device vendor-id="13623" />
+    <!-- Other vendors that ship XInput pads -->
+    <usb-device vendor-id="12068" />
+    <usb-device vendor-id="4614" />
+    <usb-device vendor-id="9414" />
+    <usb-device vendor-id="3695" />
+    <usb-device vendor-id="1848" />
+    <usb-device vendor-id="5426" />
+    <usb-device vendor-id="3853" />
+</resources>
