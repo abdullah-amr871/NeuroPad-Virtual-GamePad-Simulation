@@ -258,7 +258,7 @@ Bug reports, controller test results and pull requests are welcome. Please inclu
 NeuroPad is free and always will be. If it brought rumble back to your controller and you'd like to say thanks, you can buy me a coffee:
 
 - ☕ **Ko-fi:** [ko-fi.com/abdullahamr871](https://ko-fi.com/abdullahamr871)
-- 💙 **PayPal:** abdullah.amr.makky@outlook.com
+- 💙 **PayPal:** [paypal.me/abdullahamr871](https://paypal.me/abdullahamr871)
 
 A ⭐ on the repo helps just as much: it lets other people with the same problem find NeuroPad.
 
