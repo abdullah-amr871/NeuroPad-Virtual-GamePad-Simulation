@@ -76,6 +76,18 @@ class ScreenshotTest {
     }
 
     @Test
+    @Config(qualifiers = "w820dp-h370dp-land-xhdpi")
+    fun homeLandscape() = shot("home_landscape") { HomeScreen(vm, onStart = {}, onNavigate = {}) }
+
+    @Test
+    @Config(qualifiers = "w820dp-h370dp-land-xhdpi")
+    fun controllerLandscape() = shot("controller_landscape") { ControllerScreen(vm) }
+
+    @Test
+    @Config(qualifiers = "w820dp-h370dp-land-xhdpi")
+    fun settingsLandscape() = shot("settings_landscape") { SettingsScreen(vm, onQuit = {}) }
+
+    @Test
     @Config(qualifiers = "w412dp-h1150dp-xhdpi")
     fun connection() = shot("connection") { ConnectionScreen(vm) }
 

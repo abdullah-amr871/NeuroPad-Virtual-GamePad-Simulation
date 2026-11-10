@@ -25,6 +25,11 @@ Built for, and tested on, the **GameSir G8 Plus (MFi)**.
   <img src="docs/screenshots/settings.png" width="24%" alt="Settings screen">
 </p>
 
+<p align="center">
+  <img src="docs/screenshots/home_landscape.png" width="49%" alt="Home screen in landscape">
+  <img src="docs/screenshots/controller_landscape.png" width="49%" alt="Controller screen in landscape">
+</p>
+
 ## Contents
 
 - [What it does](#what-it-does)
@@ -47,16 +52,18 @@ Built for, and tested on, the **GameSir G8 Plus (MFi)**.
 - **Phone-vibration fallback.** For games that only vibrate the phone, that vibration is mirrored to the gamepad, split across the heavy and light motor.
 - **Button remapping.** Default, Nintendo (A/B and X/Y swapped) or a fully custom layout, including back paddles.
 - **Live controller view, rumble test and diagnostics** to see exactly what arrives and why something does not.
+- **Follows the gamepad.** The bridge stops when the gamepad is unplugged and can start by itself when it is plugged in.
+- **Made for the grip.** The app turns to landscape while a gamepad is connected and uses a two-pane layout on wide screens.
 - **Quick Settings tile** to switch the bridge on and off from inside a game.
 
 ## Download
 
-**[Download NeuroPad 2.0.0](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/releases/tag/v2.0.0)** &nbsp;·&nbsp; [all releases](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/releases)
+**[Download NeuroPad 2.0.1](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/releases/tag/v2.0.1)** &nbsp;·&nbsp; [all releases](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/releases)
 
 | File | Use it when |
 | :--- | :--- |
-| `NeuroPad_2.0.0_OneClick_Installer.zip` | You have a computer nearby. Installs everything with one double-click. |
-| `NeuroPad_2.0.0.apk` | You want to install straight on the phone (Android 11+, Wireless debugging). |
+| `NeuroPad_2.0.1_OneClick_Installer.zip` | You have a computer nearby. Installs everything with one double-click. |
+| `NeuroPad_2.0.1.apk` | You want to install straight on the phone (Android 11+, Wireless debugging). |
 
 ## Requirements
 
@@ -79,7 +86,7 @@ Android closes the ADB port when the phone reboots. Afterwards, connect it again
 
 ### Option B: on the phone only (Android 11+)
 
-1. Install `NeuroPad_2.0.0.apk`.
+1. Install `NeuroPad_2.0.1.apk`.
 2. Open the **Connection** tab, keep **Wireless debugging** selected and tap **Start pairing**.
 3. In Developer options, enable **Wireless debugging**, tap the text itself and choose **Pair device with pairing code**.
 4. Type the six digit code into the NeuroPad notification.
@@ -95,10 +102,10 @@ Choose **Root** in the Connection tab and grant superuser access. No ADB, Wi-Fi 
 
 | Controller | Status |
 | :--- | :--- |
-| GameSir G8 Plus (MFi) | Tested with NeuroPad 1.0, rumble included |
+| GameSir G8 Plus (MFi) | Tested, rumble included (Nothing Phone 2, Android 16) |
 | Other XInput USB gamepads | Not tested yet. They should work, but nothing is promised |
 
-> **Status of 2.0:** version 2.0 is a full rewrite. Its logic is covered by unit tests and every screen is rendered in CI, but at the time of release it had not yet been run on a physical phone with a gamepad. If something does not work for you, please [open an issue](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/issues) and attach the report from **Settings > Diagnostics > Share report**. [Version 1.0](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/releases/tag/v1.0.0) stays available.
+> **Status of 2.0:** version 2.0 is a full rewrite. It has been run on one phone so far (Nothing Phone 2, Android 16, PC port 5555 mode) with the GameSir G8 Plus. Other phones, the Wireless debugging setup and root mode have not been tried on hardware yet. If something does not work for you, please [open an issue](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/issues) and attach the report from **Settings > Diagnostics > Share report**. [Version 1.0](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/releases/tag/v1.0.0) stays available.
 
 Tried another controller? An issue that says whether buttons and rumble worked helps the list grow.
 
@@ -168,7 +175,13 @@ In *PC port 5555* mode, run the port activator from the computer again. In *Wire
 Tap the test buttons on the Home tab first. If the pad vibrates, the hardware path is fine: try another controller profile, and check **Settings > Diagnostics** to see whether rumble commands arrive at all. Some games simply have no controller rumble; for those, keep *Mirror phone vibration* on.
 
 **The rumble is too weak or too strong.**
-Change **Settings > Rumble > Strength**.
+Change **Settings > Rumble > Strength**. If short effects are hard to feel, raise **Shortest rumble**.
+
+**The buttons A/B (or X/Y) are swapped.**
+XInput gamepads report buttons by position, not by the letter on the cap. If your caps are in the Nintendo arrangement, choose the **Nintendo** layout on the Controller tab.
+
+**The gamepad vibrates when I type or tap in the launcher.**
+Android forwards all phone vibration to a connected controller. Keep **Settings > Rumble > Ignore system vibration** on.
 
 **The app says the driver is not installed.**
 Run the PC installer once, or use Wireless debugging so the app can install it.

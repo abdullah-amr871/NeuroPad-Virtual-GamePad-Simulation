@@ -58,7 +58,7 @@ fun ControllerScreen(vm: AppViewModel) {
         }
     }
 
-    ScreenColumn {
+    TwoPane(first = {
         Panel(
             title = "Live input",
             trailing = {
@@ -78,6 +78,7 @@ fun ControllerScreen(vm: AppViewModel) {
             if (status !is BridgeStatus.Running) Hint("Start the bridge on the Home tab to see your gamepad here.")
         }
 
+    }, second = {
         Panel(title = "Button layout") {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 LayoutMode.entries.forEach { mode ->
@@ -136,7 +137,7 @@ fun ControllerScreen(vm: AppViewModel) {
                 )
             }
         }
-    }
+    })
 
     if (target != null) {
         AlertDialog(

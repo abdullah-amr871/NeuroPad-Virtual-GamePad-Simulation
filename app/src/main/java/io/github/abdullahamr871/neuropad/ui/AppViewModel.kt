@@ -52,6 +52,9 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     var highThreshold by mutableIntStateOf(settings.hapticHighThreshold); private set
     var smoothing by mutableStateOf(settings.hapticSmoothing); private set
     var homeCombo by mutableStateOf(settings.homeCombo); private set
+    var autoStart by mutableStateOf(settings.autoStart); private set
+    var minPulseMs by mutableIntStateOf(settings.minPulseMs); private set
+    var muteSystemHaptics by mutableStateOf(settings.muteSystemHaptics); private set
     var paired by mutableStateOf(settings.paired); private set
 
     /** Name of a compatible pad that is plugged in (whether or not the bridge runs). */
@@ -102,6 +105,12 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
 
     fun onPause() = stopDiscovery()
 
+    /** A gamepad was just plugged in (the system opened or notified the app). */
+    fun onGamepadAttached() {
+        refreshUsb()
+        if (autoStart && detectedPad != null && !BridgeState.status.value.isActive) toggleBridge()
+    }
+
     fun refreshUsb() {
         detectedPad = BridgeState.usbDeviceName.value
             ?: UsbGamepadManager.findCompatible(context)?.let(UsbGamepadManager::displayName)
@@ -131,6 +140,11 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     fun toggleBridge() {
         if (BridgeState.status.value.isActive) {
             GamepadBridgeService.stop(context)
+            return
+        }
+        refreshUsb()
+        if (detectedPad == null) {
+            say("Plug in your gamepad first. The bridge only runs while one is connected.")
             return
         }
         val adbConnected = BridgeState.adb.value is AdbStatus.Connected
@@ -193,6 +207,9 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     fun updateHigh(value: Int) { highThreshold = value; settings.hapticHighThreshold = value; GamepadBridgeService.reload(context) }
     fun updateSmoothing(value: Boolean) { smoothing = value; settings.hapticSmoothing = value; GamepadBridgeService.reload(context) }
     fun updateHomeCombo(value: Boolean) { homeCombo = value; settings.homeCombo = value; GamepadBridgeService.reload(context) }
+    fun updateMinPulse(value: Int) { minPulseMs = value; settings.minPulseMs = value; GamepadBridgeService.reload(context) }
+    fun updateMuteSystem(value: Boolean) { muteSystemHaptics = value; settings.muteSystemHaptics = value; GamepadBridgeService.reload(context) }
+    fun updateAutoStart(value: Boolean) { autoStart = value; settings.autoStart = value }
     fun updateFallback(value: Boolean) {
         phoneFallback = value
         settings.phoneVibrationFallback = value

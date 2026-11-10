@@ -2,6 +2,7 @@ package io.github.abdullahamr871.neuropad.bridge
 
 import android.content.Context
 import android.hardware.usb.UsbDevice
+import android.util.Log
 import io.github.abdullahamr871.neuropad.adb.AdbConnectionManager
 import io.github.abdullahamr871.neuropad.core.ButtonLayout
 import io.github.abdullahamr871.neuropad.core.EmulationProfile
@@ -35,6 +36,8 @@ class BridgeSession(
     private val context: Context,
     private val settings: Settings,
     private val onLost: (reason: String) -> Unit,
+    /** Called once when the gamepad is unplugged while the session is running. */
+    private val onGamepadGone: () -> Unit,
 ) : UsbGamepadManager.Listener {
 
     val profile: EmulationProfile = settings.profile
@@ -44,6 +47,17 @@ class BridgeSession(
     @Volatile private var builder = newBuilder()
     @Volatile private var gain = settings.rumbleGain
     @Volatile private var rumbleTimeoutMs = settings.rumbleTimeoutMs
+    @Volatile private var minPulseMs = settings.minPulseMs
+    @Volatile private var muteSystem = settings.muteSystemHaptics
+
+    // Controller-rumble state (guarded by rumbleLock).
+    private val rumbleLock = Any()
+    private var nativeActive = false
+    private var pulseStartNanos = 0L
+    private var delayedStop: ScheduledFuture<*>? = null
+    private var systemCallerAtNanos = 0L
+    private var held: IntArray? = null
+    private var heldAtNanos = 0L
 
     private var process: ShellProcess? = null
     private var stdin: OutputStream? = null
@@ -122,11 +136,12 @@ class BridgeSession(
         if (greeted && !confirmed) throw IllegalStateException("The driver did not confirm the virtual controller.")
         registered = true
 
-        if (settings.phoneVibrationFallback) {
-            mirror = PhoneVibrationMirror(shell, raw, context.packageName, splitter) { l, r ->
-                applyRumble(l, r, RumbleSource.PHONE_VIBRATION)
-            }.also { it.start() }
-        }
+        // Always runs: besides the optional fallback it tells us who asked for a vibration.
+        mirror = PhoneVibrationMirror(
+            shell, raw, context.packageName, splitter,
+            replayEffects = settings.phoneVibrationFallback,
+            onCaller = ::onVibrationCaller,
+        ) { l, r -> applyRumble(l, r, RumbleSource.PHONE_VIBRATION) }.also { it.start() }
 
         usb.register()
         usb.scanAndConnect()
@@ -280,7 +295,86 @@ class BridgeSession(
         mirror?.onNativeRumble()
         val left = RumbleParser.boost(rumble.left, rumble.leftTrigger, gain)
         val right = RumbleParser.boost(rumble.right, rumble.rightTrigger, gain)
+        Log.d(TAG, "rumble ${data.take(8)} -> $left/$right")
+        onControllerRumble(left, right)
+    }
+
+    /**
+     * Rumble that arrived through the virtual controller. Two adjustments are made here:
+     *
+     *  - Android (with "vibrate input devices" on, as on Nothing phones) forwards *every*
+     *    phone vibration to a connected controller, including launcher taps and keyboard
+     *    clicks. Requests that the vibration log attributes to the system are dropped.
+     *  - Very short pulses are stretched to [minPulseMs] so that the motors can spin up.
+     */
+    private fun onControllerRumble(left: Int, right: Int) {
+        synchronized(rumbleLock) {
+            val now = System.nanoTime()
+            if (left > 0 || right > 0) {
+                if (muteSystem && now - systemCallerAtNanos < SYSTEM_CALLER_WINDOW_NANOS) {
+                    // The caller line may still correct this within a few milliseconds.
+                    held = intArrayOf(left, right)
+                    heldAtNanos = now
+                    return
+                }
+                startPulse(left, right, now)
+            } else {
+                held = null
+                if (!nativeActive) return
+                // Games build long rumbles out of ~100 ms pulses with a stop and a new start
+                // only a few milliseconds apart (measured on a Nothing Phone 2). Passing those
+                // gaps on makes the motors stutter, so every stop waits briefly for a restart.
+                val min = minPulseMs
+                val remainingMs = if (min <= 0) 0 else maxOf(min - (now - pulseStartNanos) / 1_000_000, GAP_BRIDGE_MS)
+                if (remainingMs > 2) {
+                    synchronized(scheduler) {
+                        if (!scheduler.isShutdown) {
+                            delayedStop?.cancel(false)
+                            delayedStop = scheduler.schedule({ endPulse() }, remainingMs, TimeUnit.MILLISECONDS)
+                        }
+                    }
+                } else {
+                    endPulseLocked()
+                }
+            }
+        }
+    }
+
+    private fun startPulse(left: Int, right: Int, now: Long) {
+        delayedStop?.cancel(false)
+        delayedStop = null
+        if (!nativeActive) pulseStartNanos = now
+        nativeActive = true
         applyRumble(left, right, RumbleSource.CONTROLLER_RUMBLE)
+    }
+
+    private fun endPulse() = synchronized(rumbleLock) { endPulseLocked() }
+
+    private fun endPulseLocked() {
+        delayedStop?.cancel(false)
+        delayedStop = null
+        if (nativeActive) {
+            nativeActive = false
+            applyRumble(0, 0, RumbleSource.CONTROLLER_RUMBLE)
+        }
+    }
+
+    /** Called from the vibration log reader for every vibration request Android receives. */
+    private fun onVibrationCaller(system: Boolean) {
+        if (!muteSystem) return
+        synchronized(rumbleLock) {
+            val now = System.nanoTime()
+            if (system) {
+                systemCallerAtNanos = now
+                held = null
+                endPulseLocked() // the report can overtake its log line: cut what slipped through
+            } else {
+                systemCallerAtNanos = 0
+                val h = held
+                held = null
+                if (h != null && now - heldAtNanos < HELD_RUMBLE_MAX_AGE_NANOS) startPulse(h[0], h[1], now)
+            }
+        }
     }
 
     private fun applyRumble(left: Int, right: Int, source: RumbleSource) {
@@ -322,6 +416,8 @@ class BridgeSession(
     private fun applyHapticSettings() {
         gain = settings.rumbleGain
         rumbleTimeoutMs = settings.rumbleTimeoutMs
+        minPulseMs = settings.minPulseMs
+        muteSystem = settings.muteSystemHaptics
         splitter.gain = gain
         splitter.lowThreshold = settings.hapticLowThreshold
         splitter.highThreshold = settings.hapticHighThreshold
@@ -343,6 +439,9 @@ class BridgeSession(
             write(HidProtocol.report(builder.build(idle)))
             BridgeState.physical.value = idle
             BridgeState.mappedButtons.value = 0
+            // Without a gamepad the virtual controller is only a ghost that games would
+            // still list, so the whole bridge shuts down.
+            onGamepadGone()
         }
     }
 
@@ -431,5 +530,11 @@ class BridgeSession(
         /** Sent for wire compatibility; the daemon deliberately does not hand it to the kernel. */
         const val VIRTUAL_UNIQ = "aa:bb:cc:dd:ee:ff"
         const val UHID_OUTPUT_REPORT = 1
+        const val TAG = "NeuroPad/Rumble"
+
+        /** How long after a system vibration request controller rumble is treated as its echo. */
+        const val SYSTEM_CALLER_WINDOW_NANOS = 400_000_000L
+        const val HELD_RUMBLE_MAX_AGE_NANOS = 150_000_000L
+        const val GAP_BRIDGE_MS = 15L
     }
 }

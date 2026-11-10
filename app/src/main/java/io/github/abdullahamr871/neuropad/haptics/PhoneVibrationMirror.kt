@@ -20,6 +20,10 @@ class PhoneVibrationMirror(
     private val rawTransport: Boolean,
     private val ownPackage: String,
     private val splitter: HapticSplitter,
+    /** False: only watch who is vibrating, never replay effects. */
+    private val replayEffects: Boolean,
+    /** Told about every vibration request: true when it comes from the system UI or keyboard. */
+    private val onCaller: (system: Boolean) -> Unit,
     /** Receives motor values 0..255 (left = heavy, right = light). */
     private val sink: (left: Int, right: Int) -> Unit,
 ) {
@@ -49,7 +53,10 @@ class PhoneVibrationMirror(
                 if (!running) return@thread
                 val p = shell.spawn(VibrationLogParser.LOGCAT_COMMAND, rawTransport)
                 process = p
-                BridgeState.log("Haptics", "Phone-vibration fallback is listening")
+                BridgeState.log(
+                    "Haptics",
+                    if (replayEffects) "Phone-vibration fallback is listening" else "Watching vibration requests",
+                )
                 p.stdout.bufferedReader().useLines { lines ->
                     for (line in lines) {
                         if (!running) break
@@ -76,18 +83,22 @@ class PhoneVibrationMirror(
         if (!nativePathActive) {
             nativePathActive = true
             cancelEffect()
-            BridgeState.log("Haptics", "Controller rumble detected, phone-vibration fallback paused")
+            if (replayEffects) {
+                BridgeState.log("Haptics", "Controller rumble detected, phone-vibration fallback paused")
+            }
         }
     }
 
     private fun handle(line: String) {
         for (event in VibrationLogParser.parse(line)) {
             when (event) {
-                is VibrationEvent.Caller ->
+                is VibrationEvent.Caller -> {
                     mutedCaller = VibrationLogParser.isSystemCaller(event.packageName, ownPackage)
+                    onCaller(mutedCaller)
+                }
                 else -> {
                     // Keyboard clicks, notifications and other system haptics are not game rumble.
-                    if (nativePathActive || mutedCaller) continue
+                    if (!replayEffects || nativePathActive || mutedCaller) continue
                     play(event)
                 }
             }
