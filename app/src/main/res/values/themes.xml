@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.NeuroPad" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/np_background</item>
+        <item name="android:statusBarColor">@color/np_background</item>
+        <item name="android:navigationBarColor">@color/np_background</item>
+        <item name="android:colorAccent">@color/np_primary</item>
+    </style>
+</resources>
