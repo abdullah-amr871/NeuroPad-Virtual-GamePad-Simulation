@@ -92,12 +92,9 @@ async function main() {
     for (let s; (s = queue.shift());) await renderScene(browser, s.id, s.dur);
   }));
 
-  // Thumbnail, 1280x720.
-  const tp = await openScene(browser, 'thumbnail', 10);
-  await seek(tp, 9);
-  await tp.screenshot({ path: path.join(BUILD, 'thumb_1080.png') });
   await browser.close();
-  execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-i', path.join(BUILD, 'thumb_1080.png'), '-vf', 'scale=1280:720', path.join(__dirname, 'thumbnail.png')]);
+  // Thumbnail (real G8+ MFi photo), 1280x720.
+  execFileSync('node', [path.join(__dirname, 'thumbnail.js')], { stdio: 'inherit' });
 
   // Video track: concatenate the clips.
   const list = path.join(BUILD, 'clips.txt');
