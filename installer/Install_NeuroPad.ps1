@@ -1,154 +1,111 @@
 # ========================================================================
-#       NeuroPad - Virtual GamePad Simulation (PowerShell Installer)
+#  NeuroPad 2 - one-click installer (Windows PowerShell)
+#  Needs: USB debugging enabled, phone connected with a data cable.
 # ========================================================================
-# Requires: USB Debugging enabled on Android device connected via USB
-# ========================================================================
+$ErrorActionPreference = 'Continue'
+$Host.UI.RawUI.WindowTitle = 'NeuroPad 2 - Installer'
 
-[CmdletBinding()]
-param()
+$ScriptDir    = Split-Path -Parent $MyInvocation.MyCommand.Path
+$Pkg          = 'io.github.abdullahamr871.neuropad'
+$OldPkg       = 'com.g8.driver'
+$Apk          = Join-Path $ScriptDir 'NeuroPad.apk'
+$Daemon       = Join-Path $ScriptDir 'uinput_proto'
+$RemoteDaemon = '/data/local/tmp/uinput_proto'
 
-$ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-
-function Write-Header {
-    Clear-Host
-    Write-Host "==========================================================" -ForegroundColor Cyan
-    Write-Host "      NeuroPad - Virtual GamePad Simulation               " -ForegroundColor Yellow -NoNewline
-    Write-Host " [v1.0]" -ForegroundColor Green
-    Write-Host "==========================================================" -ForegroundColor Cyan
-    Write-Host ""
+function Info($m) { Write-Host $m -ForegroundColor Cyan }
+function Ok($m)   { Write-Host "[OK] $m" -ForegroundColor Green }
+function Warn($m) { Write-Host "[!] $m" -ForegroundColor Yellow }
+function Die($m)  {
+    Write-Host "[ERROR] $m" -ForegroundColor Red
+    Write-Host ''
+    Read-Host 'Press ENTER to close'
+    exit 1
 }
 
-Write-Header
-Write-Host "This script configures your Android phone for standalone"
-Write-Host "kernel-level gamepad virtualization without root."
-Write-Host ""
-Write-Host "Please ensure:" -ForegroundColor Yellow
-Write-Host "  1. Your phone is connected to this PC via USB."
-Write-Host "  2. USB Debugging is ENABLED in Developer Options."
-Write-Host "  3. You tap 'Allow' on your phone when prompted."
-Write-Host ""
+Write-Host '==========================================================' -ForegroundColor Cyan
+Write-Host '  NeuroPad 2 - rumble for USB gamepads on Android' -ForegroundColor Yellow
+Write-Host '==========================================================' -ForegroundColor Cyan
+Write-Host ''
+Write-Host 'Before you continue:'
+Write-Host '  1. Connect the phone to this PC with a USB data cable.'
+Write-Host '  2. Enable USB debugging in Developer options.'
+Write-Host '  3. Tap "Allow" on the phone when it asks.'
+Write-Host ''
+Read-Host 'Press ENTER to start (Ctrl+C to cancel)' | Out-Null
+Write-Host ''
 
-$confirm = Read-Host "Press ENTER to begin installation (or Ctrl+C to cancel)"
-Write-Host ""
-
-# ------------------------------------------------------------------------
-# 1. Locate ADB
-# ------------------------------------------------------------------------
-Write-Host "Searching for adb.exe..." -ForegroundColor Cyan
-
-$AdbCandidatePaths = @(
-    Join-Path $ScriptDir "tools\adb.exe",
-    Join-Path $ScriptDir "adb.exe",
-    Join-Path $ScriptDir "platform-tools\adb.exe",
-    "$env:LOCALAPPDATA\Android\Sdk\platform-tools\adb.exe"
+# ---- 1. adb ---------------------------------------------------------------
+$Adb = $null
+$candidates = @(
+    (Join-Path $ScriptDir 'tools\adb.exe'),
+    (Join-Path $ScriptDir 'adb.exe'),
+    (Join-Path $env:LOCALAPPDATA 'Android\Sdk\platform-tools\adb.exe')
 )
-
-$AdbPath = $null
-foreach ($path in $AdbCandidatePaths) {
-    if (Test-Path $path) {
-        $AdbPath = $path
-        break
-    }
+foreach ($c in $candidates) { if (-not $Adb -and (Test-Path $c)) { $Adb = $c } }
+if (-not $Adb) {
+    $cmd = Get-Command adb -ErrorAction SilentlyContinue
+    if ($cmd) { $Adb = $cmd.Source }
 }
+if (-not $Adb) { Die 'adb.exe was not found. Extract the whole ZIP and keep the "tools" folder next to this script.' }
+Ok "Using adb: $Adb"
+if (-not (Test-Path $Apk)) { Die 'NeuroPad.apk is missing. Extract the whole ZIP and run the installer from that folder.' }
 
-if (-not $AdbPath) {
-    $whereAdb = Get-Command adb.exe -ErrorAction SilentlyContinue
-    if ($whereAdb) {
-        $AdbPath = $whereAdb.Source
-    }
-}
+# ---- 2. device ------------------------------------------------------------
+Info '[1/5] Waiting for the phone...'
+& $Adb start-server 2>$null | Out-Null
+& $Adb wait-for-device
+$state = (& $Adb get-state 2>$null | Out-String).Trim()
+if ($state -ne 'device') { Die "The phone is '$state'. Unlock it and allow USB debugging, then run the installer again." }
+$model = (& $Adb shell getprop ro.product.model | Out-String).Trim()
+$abi   = (& $Adb shell getprop ro.product.cpu.abi | Out-String).Trim()
+Ok "Connected: $model ($abi)"
+if ($abi -ne 'arm64-v8a') { Warn "NeuroPad needs a 64-bit ARM phone; '$abi' will most likely not work." }
 
-if (-not $AdbPath) {
-    Write-Host "[ERROR] adb.exe could not be found!" -ForegroundColor Red
-    Write-Host "Ensure the 'tools' folder with adb.exe is present in this directory."
-    Read-Host "Press ENTER to exit..."
-    exit 1
-}
-
-Write-Host "[OK] Found ADB: $AdbPath" -ForegroundColor Green
-Write-Host ""
-
-# ------------------------------------------------------------------------
-# 2. Wait for Device
-# ------------------------------------------------------------------------
-Write-Host "[1/5] Waiting for connected Android device..." -ForegroundColor Cyan
-& $AdbPath wait-for-device
-if ($LASTEXITCODE -ne 0) {
-    Write-Host "[ERROR] Failed to communicate with device." -ForegroundColor Red
-    exit 1
-}
-$deviceModel = (& $AdbPath shell getprop ro.product.model).Trim()
-Write-Host "[OK] Connected device: $deviceModel" -ForegroundColor Green
-Write-Host ""
-
-# ------------------------------------------------------------------------
-# 3. Deploy uinput_proto Kernel Daemon
-# ------------------------------------------------------------------------
-Write-Host "[2/5] Deploying native kernel gamepad daemon (uinput_proto)..." -ForegroundColor Cyan
-$uinputBin = Join-Path $ScriptDir "uinput_proto"
-
-if (Test-Path $uinputBin) {
-    & $AdbPath push $uinputBin /data/local/tmp/uinput_proto | Out-Null
-    & $AdbPath shell chmod 755 /data/local/tmp/uinput_proto | Out-Null
-    $isExec = (& $AdbPath shell "[ -x /data/local/tmp/uinput_proto ] && echo YES || echo NO").Trim()
-    if ($isExec -eq "YES") {
-        Write-Host "[OK] Gamepad daemon deployed to /data/local/tmp/uinput_proto (executable)" -ForegroundColor Green
-    } else {
-        Write-Host "[WARNING] Deployed but executable check returned: $isExec" -ForegroundColor Yellow
-    }
+# ---- 3. driver ------------------------------------------------------------
+Info '[2/5] Installing the driver...'
+if (Test-Path $Daemon) {
+    & $Adb push $Daemon $RemoteDaemon | Out-Null
+    if ($LASTEXITCODE -ne 0) { Die 'Could not copy the driver to the phone.' }
+    & $Adb shell chmod 755 $RemoteDaemon
+    $version = (& $Adb shell "$RemoteDaemon --version" 2>$null | Out-String).Trim()
+    if ($version) { Ok "Driver $version installed" } else { Warn 'Driver copied, but it did not report a version.' }
 } else {
-    Write-Host "[WARNING] uinput_proto binary not found in script folder!" -ForegroundColor Yellow
+    Warn 'uinput_proto not found next to the script; the app will install its own copy.'
 }
-Write-Host ""
 
-# ------------------------------------------------------------------------
-# 4. Enable TCP/IP Port 5555 Loopback
-# ------------------------------------------------------------------------
-Write-Host "[3/5] Enabling ADB TCP loopback on Port 5555..." -ForegroundColor Cyan
-& $AdbPath tcpip 5555
-Start-Sleep -Seconds 2
-& $AdbPath wait-for-device
-$tcpPort = (& $AdbPath shell getprop service.adb.tcp.port).Trim()
-Write-Host "[OK] ADB TCP Port active: $tcpPort" -ForegroundColor Green
-Write-Host ""
-
-# ------------------------------------------------------------------------
-# 5. Install APK
-# ------------------------------------------------------------------------
-Write-Host "[4/5] Installing NeuroPad App (NeuroPad_App.apk)..." -ForegroundColor Cyan
-$apkFile = Join-Path $ScriptDir "NeuroPad_App.apk"
-
-if (Test-Path $apkFile) {
-    & $AdbPath install -r -d $apkFile
-    if ($LASTEXITCODE -eq 0) {
-        Write-Host "[OK] NeuroPad App installed successfully!" -ForegroundColor Green
-    } else {
-        Write-Host "[ERROR] APK installation failed with exit code $LASTEXITCODE." -ForegroundColor Red
-    }
-} else {
-    Write-Host "[ERROR] NeuroPad_App.apk not found in script folder!" -ForegroundColor Red
+# ---- 4. app ---------------------------------------------------------------
+Info '[3/5] Installing the NeuroPad app...'
+$packages = (& $Adb shell pm list packages | Out-String) -split "`r?`n"
+if ($packages -contains "package:$OldPkg") {
+    Warn "Removing NeuroPad 1.0 ($OldPkg); version 2 is a separate app with its own settings."
+    & $Adb uninstall $OldPkg 2>$null | Out-Null
 }
-Write-Host ""
+& $Adb install -r $Apk
+if ($LASTEXITCODE -ne 0) { Die 'The app could not be installed. On Xiaomi phones enable "Install via USB" in Developer options.' }
+Ok 'App installed'
 
-# ------------------------------------------------------------------------
-# 6. Launch App
-# ------------------------------------------------------------------------
-Write-Host "[5/5] Launching NeuroPad on phone screen..." -ForegroundColor Cyan
-& $AdbPath shell am force-stop com.g8.driver 2>&1 | Out-Null
-& $AdbPath shell am start -n com.g8.driver/.MainActivity 2>&1 | Out-Null
-Write-Host "[OK] App launched on device!" -ForegroundColor Green
-Write-Host ""
+# ---- 5. port 5555 ---------------------------------------------------------
+Info '[4/5] Opening ADB port 5555 on the phone...'
+& $Adb tcpip 5555 2>$null | Out-Null
+Start-Sleep -Seconds 3
+& $Adb wait-for-device
+$port = (& $Adb shell getprop service.adb.tcp.port | Out-String).Trim()
+if ($port -eq '5555') { Ok 'Port 5555 is open' } else { Warn "The phone reports port '$port'. Run Activate_Port_5555.bat if the app cannot connect." }
 
-# ------------------------------------------------------------------------
-# Complete
-# ------------------------------------------------------------------------
-Write-Host "==========================================================" -ForegroundColor Green
-Write-Host "               INSTALLATION COMPLETE!                     " -ForegroundColor Yellow
-Write-Host "==========================================================" -ForegroundColor Green
-Write-Host ""
-Write-Host "NEXT STEPS:" -ForegroundColor Cyan
-Write-Host " 1. Unplug the USB cable from your PC."
-Write-Host " 2. Plug your Gamepad (USB-C or Bluetooth) into your phone."
-Write-Host " 3. Toggle 'Gamepad Virtualization' ON inside NeuroPad!"
-Write-Host ""
-Read-Host "Press ENTER to finish..."
+# ---- 6. launch ------------------------------------------------------------
+Info '[5/5] Starting NeuroPad...'
+& $Adb shell am start -n "$Pkg/.ui.MainActivity" --es neuropad_mode port5555 2>$null | Out-Null
+Ok 'NeuroPad is open on the phone'
+
+Write-Host ''
+Write-Host '==========================================================' -ForegroundColor Green
+Write-Host '  Done!' -ForegroundColor Yellow
+Write-Host '==========================================================' -ForegroundColor Green
+Write-Host ' 1. Unplug the phone from the PC.'
+Write-Host ' 2. Plug your USB gamepad into the phone.'
+Write-Host ' 3. In NeuroPad, tap the big power button.'
+Write-Host ''
+Write-Host ' After a reboot of the phone, run Activate_Port_5555.bat again'
+Write-Host ' (or pair NeuroPad with Wireless debugging once and forget the PC).'
+Write-Host ''
+Read-Host 'Press ENTER to close' | Out-Null

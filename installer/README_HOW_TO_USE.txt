@@ -1,41 +1,37 @@
-========================================================================
-         NEUROPAD - VIRTUAL GAMEPAD SIMULATION (INSTALLER GUIDE)
-========================================================================
+NeuroPad 2 - rumble for USB gamepads on Android
+================================================
 
-This package contains everything required to install and configure
-NeuroPad - Virtual GamePad Simulation on ANY Android device (Android 8.0 - Android 16+).
+WHAT IS IN THIS FOLDER
+  NeuroPad.apk              the Android app
+  uinput_proto              the small driver the app runs on the phone
+  Install_NeuroPad.bat      one-click installer for Windows
+  Activate_Port_5555.bat    re-opens the port after the phone was rebooted
+  install_neuropad.sh       the same for macOS / Linux
+  activate_port_5555.sh
+  tools\                    adb for Windows (nothing to install on the PC)
 
-------------------------------------------------------------------------
-HOW TO INSTALL TO ANY ANDROID PHONE:
-------------------------------------------------------------------------
+INSTALL (2 minutes)
+  1. On the phone: Settings > About phone > tap "Build number" 7 times.
+     Then Settings > System > Developer options > enable "USB debugging".
+     (Xiaomi: also enable "Install via USB" and "USB debugging (Security settings)".)
+  2. Connect the phone to the computer with a USB data cable and tap "Allow".
+  3. Windows: double-click Install_NeuroPad.bat
+     macOS / Linux: run  ./install_neuropad.sh  in a terminal
+  4. Unplug the phone, plug the gamepad into it, open NeuroPad and tap the
+     big power button.
 
-1. Enable USB Debugging on the target phone:
-   - Go to Settings -> About Phone -> Tap "Build Number" 7 times.
-   - Go to Settings -> System -> Developer Options -> Enable "USB Debugging".
+AFTER A REBOOT OF THE PHONE
+  Android closes port 5555. Connect the phone again and run
+  Activate_Port_5555.bat (or activate_port_5555.sh). Nothing is reinstalled.
 
-2. Plug the phone into your PC via USB cable.
+NO COMPUTER AT HAND? (Android 11 or newer)
+  Install NeuroPad.apk directly on the phone, open the Connection tab,
+  choose "Wireless debugging" and follow the pairing steps. The app then
+  installs its driver by itself and never needs a computer.
 
-3. Double-click "Install_NeuroPad.bat" (or right-click Install_NeuroPad.ps1 -> Run with PowerShell).
+UPGRADING FROM 1.0
+  Version 2 is a new app (new name on the phone: "NeuroPad"). The installer
+  removes the old "NEUROPAD (GamePad Virtualizer)" app for you.
 
-4. The installer will automatically:
-   - Detect the connected Android phone.
-   - Push the native uinput_proto gamepad kernel daemon to /data/local/tmp/.
-   - Set executable permissions (chmod 755).
-   - Activate ADB TCP Port 5555 for standalone gamepad virtualization.
-   - Install NeuroPad_App.apk.
-   - Launch NeuroPad on your phone screen.
-
-5. UNPLUG the phone from your PC, attach your Gamepad (USB-C or Bluetooth),
-   and turn Virtualization ON inside NeuroPad!
-
-------------------------------------------------------------------------
-PACKAGE CONTENTS:
-------------------------------------------------------------------------
-- Install_NeuroPad.bat       : 1-Click launcher script (Double-click this!)
-- Install_NeuroPad.ps1       : Installer engine script
-- NeuroPad_App.apk           : Patched, signed NeuroPad application
-- uinput_proto               : Native arm64-v8a kernel gamepad daemon binary
-- tools/                     : Portable ADB toolset (No PC setup required)
-- README_HOW_TO_USE.txt      : Instructions guide
-
-========================================================================
+HELP
+  https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation

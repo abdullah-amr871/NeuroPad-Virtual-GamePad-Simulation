@@ -1,133 +1,102 @@
 #!/usr/bin/env bash
 # ========================================================================
-#       NeuroPad - Virtual GamePad Simulation (Shell Installer)
-#                    (Linux & macOS Compatible)
+#  NeuroPad 2 - one-click installer (Linux & macOS)
+#  Needs: USB debugging enabled, phone connected with a data cable.
 # ========================================================================
-# Requires: USB Debugging enabled on Android device connected via USB
-# ========================================================================
-
-set -e
+set -u
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PKG="io.github.abdullahamr871.neuropad"
+OLD_PKG="com.g8.driver"
+APK="$SCRIPT_DIR/NeuroPad.apk"
+DAEMON="$SCRIPT_DIR/uinput_proto"
+REMOTE_DAEMON="/data/local/tmp/uinput_proto"
 
-# ANSI color codes
-CYAN='\033[0;36m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-RED='\033[0;31m'
-NC='\033[0m' # No Color
+C='\033[0;36m'; G='\033[0;32m'; Y='\033[1;33m'; R='\033[0;31m'; N='\033[0m'
+info() { echo -e "${C}$*${N}"; }
+ok()   { echo -e "${G}[OK]${N} $*"; }
+warn() { echo -e "${Y}[!]${N} $*"; }
+die()  { echo -e "${R}[ERROR]${N} $*"; exit 1; }
 
-echo -e "${CYAN}==========================================================${NC}"
-echo -e "${YELLOW}      NeuroPad - Virtual GamePad Simulation               ${GREEN}[v1.0]${NC}"
-echo -e "${CYAN}==========================================================${NC}"
-echo ""
-echo "This script configures your Android phone for standalone"
-echo "kernel-level gamepad virtualization without root."
-echo ""
-echo -e "${YELLOW}Please ensure:${NC}"
-echo "  1. Your phone is connected to this machine via USB."
-echo "  2. USB Debugging is ENABLED in Developer Options."
-echo "  3. You tap 'Allow' on your phone when prompted."
-echo ""
+echo -e "${C}==========================================================${N}"
+echo -e "${Y}  NeuroPad 2 - rumble for USB gamepads on Android${N}"
+echo -e "${C}==========================================================${N}"
+echo
+echo "Before you continue:"
+echo "  1. Connect the phone to this computer with a USB data cable."
+echo "  2. Enable USB debugging in Developer options."
+echo "  3. Tap 'Allow' on the phone when it asks."
+echo
+read -rp "Press ENTER to start (Ctrl+C to cancel)... " _
+echo
 
-read -rp "Press ENTER to begin installation (or Ctrl+C to cancel)..." _
-echo ""
+# ---- 1. adb ---------------------------------------------------------------
+ADB=""
+for candidate in "$(command -v adb 2>/dev/null)" "$SCRIPT_DIR/tools/adb" \
+    "$HOME/Android/Sdk/platform-tools/adb" "$HOME/Library/Android/sdk/platform-tools/adb"; do
+    if [ -n "$candidate" ] && [ -x "$candidate" ]; then ADB="$candidate"; break; fi
+done
+[ -n "$ADB" ] || die "adb was not found. Install it first:
+    macOS:  brew install android-platform-tools
+    Debian/Ubuntu:  sudo apt install adb"
+ok "Using adb: $ADB"
 
-# ------------------------------------------------------------------------
-# 1. Locate ADB
-# ------------------------------------------------------------------------
-echo -e "${CYAN}Searching for adb...${NC}"
-ADB_BIN=""
+[ -f "$APK" ] || die "NeuroPad.apk is missing. Extract the whole ZIP and run the script from that folder."
 
-if command -v adb >/dev/null 2>&1; then
-    ADB_BIN="$(command -v adb)"
-elif [ -x "$SCRIPT_DIR/tools/adb" ]; then
-    ADB_BIN="$SCRIPT_DIR/tools/adb"
-elif [ -x "$HOME/Android/Sdk/platform-tools/adb" ]; then
-    ADB_BIN="$HOME/Android/Sdk/platform-tools/adb"
-fi
+# ---- 2. device ------------------------------------------------------------
+info "[1/5] Waiting for the phone..."
+"$ADB" start-server >/dev/null 2>&1
+"$ADB" wait-for-device || die "No device found."
+STATE="$("$ADB" get-state 2>/dev/null | tr -d '\r')"
+[ "$STATE" = "device" ] || die "The phone is '$STATE'. Unlock it and allow USB debugging, then run this again."
+MODEL="$("$ADB" shell getprop ro.product.model | tr -d '\r')"
+ABI="$("$ADB" shell getprop ro.product.cpu.abi | tr -d '\r')"
+ok "Connected: $MODEL ($ABI)"
+[ "$ABI" = "arm64-v8a" ] || warn "NeuroPad needs a 64-bit ARM phone; '$ABI' will most likely not work."
 
-if [ -z "$ADB_BIN" ]; then
-    echo -e "${RED}[ERROR] adb binary could not be found!${NC}"
-    echo "Please install Android platform-tools (e.g., 'brew install android-platform-tools' or 'sudo apt install adb')."
-    exit 1
-fi
-
-echo -e "${GREEN}[OK] Found ADB: $ADB_BIN${NC}"
-echo ""
-
-# ------------------------------------------------------------------------
-# 2. Wait for Device
-# ------------------------------------------------------------------------
-echo -e "${CYAN}[1/5] Waiting for connected Android device...${NC}"
-"$ADB_BIN" wait-for-device
-DEVICE_MODEL="$("$ADB_BIN" shell getprop ro.product.model | tr -d '\r')"
-echo -e "${GREEN}[OK] Connected device: $DEVICE_MODEL${NC}"
-echo ""
-
-# ------------------------------------------------------------------------
-# 3. Deploy uinput_proto Kernel Daemon
-# ------------------------------------------------------------------------
-echo -e "${CYAN}[2/5] Deploying native kernel gamepad daemon (uinput_proto)...${NC}"
-UINPUT_BIN="$SCRIPT_DIR/uinput_proto"
-
-if [ -f "$UINPUT_BIN" ]; then
-    "$ADB_BIN" push "$UINPUT_BIN" /data/local/tmp/uinput_proto >/dev/null 2>&1
-    "$ADB_BIN" shell chmod 755 /data/local/tmp/uinput_proto >/dev/null 2>&1
-    IS_EXEC="$("$ADB_BIN" shell "[ -x /data/local/tmp/uinput_proto ] && echo YES || echo NO" | tr -d '\r')"
-    if [ "$IS_EXEC" = "YES" ]; then
-        echo -e "${GREEN}[OK] Gamepad daemon deployed to /data/local/tmp/uinput_proto (executable)${NC}"
-    else
-        echo -e "${YELLOW}[WARNING] Deployed but executable check returned: $IS_EXEC${NC}"
-    fi
+# ---- 3. driver ------------------------------------------------------------
+info "[2/5] Installing the driver..."
+if [ -f "$DAEMON" ]; then
+    "$ADB" push "$DAEMON" "$REMOTE_DAEMON" >/dev/null || die "Could not copy the driver to the phone."
+    "$ADB" shell chmod 755 "$REMOTE_DAEMON"
+    VERSION="$("$ADB" shell "$REMOTE_DAEMON --version" 2>/dev/null | tr -d '\r')"
+    if [ -n "$VERSION" ]; then ok "Driver $VERSION installed"; else warn "Driver copied, but it did not report a version."; fi
 else
-    echo -e "${YELLOW}[WARNING] uinput_proto binary not found in script folder!${NC}"
+    warn "uinput_proto not found next to the script; the app will install its own copy."
 fi
-echo ""
 
-# ------------------------------------------------------------------------
-# 4. Enable TCP/IP Port 5555 Loopback
-# ------------------------------------------------------------------------
-echo -e "${CYAN}[3/5] Enabling ADB TCP loopback on Port 5555...${NC}"
-"$ADB_BIN" tcpip 5555
-sleep 2
-"$ADB_BIN" wait-for-device
-TCP_PORT="$("$ADB_BIN" shell getprop service.adb.tcp.port | tr -d '\r')"
-echo -e "${GREEN}[OK] ADB TCP Port active: $TCP_PORT${NC}"
-echo ""
-
-# ------------------------------------------------------------------------
-# 5. Install APK
-# ------------------------------------------------------------------------
-echo -e "${CYAN}[4/5] Installing NeuroPad App (NeuroPad_App.apk)...${NC}"
-APK_FILE="$SCRIPT_DIR/NeuroPad_App.apk"
-
-if [ -f "$APK_FILE" ]; then
-    "$ADB_BIN" install -r -d "$APK_FILE"
-    echo -e "${GREEN}[OK] NeuroPad App installed successfully!${NC}"
-else
-    echo -e "${RED}[ERROR] NeuroPad_App.apk not found in script folder!${NC}"
+# ---- 4. app ---------------------------------------------------------------
+info "[3/5] Installing the NeuroPad app..."
+if "$ADB" shell pm list packages | tr -d '\r' | grep -qx "package:$OLD_PKG"; then
+    warn "Removing NeuroPad 1.0 ($OLD_PKG); version 2 is a separate app with its own settings."
+    "$ADB" uninstall "$OLD_PKG" >/dev/null 2>&1 || true
 fi
-echo ""
+if ! "$ADB" install -r "$APK"; then
+    die "The app could not be installed. On Xiaomi phones enable 'Install via USB' in Developer options."
+fi
+ok "App installed"
 
-# ------------------------------------------------------------------------
-# 6. Launch App
-# ------------------------------------------------------------------------
-echo -e "${CYAN}[5/5] Launching NeuroPad on phone screen...${NC}"
-"$ADB_BIN" shell am force-stop com.g8.driver >/dev/null 2>&1 || true
-"$ADB_BIN" shell am start -n com.g8.driver/.MainActivity >/dev/null 2>&1 || true
-echo -e "${GREEN}[OK] App launched on device!${NC}"
-echo ""
+# ---- 5. port 5555 ---------------------------------------------------------
+info "[4/5] Opening ADB port 5555 on the phone..."
+"$ADB" tcpip 5555 >/dev/null 2>&1
+sleep 3
+"$ADB" wait-for-device
+PORT="$("$ADB" shell getprop service.adb.tcp.port | tr -d '\r')"
+if [ "$PORT" = "5555" ]; then ok "Port 5555 is open"; else warn "The phone reports port '$PORT'. Run activate_port_5555.sh if the app cannot connect."; fi
 
-# ------------------------------------------------------------------------
-# Complete
-# ------------------------------------------------------------------------
-echo -e "${GREEN}==========================================================${NC}"
-echo -e "${YELLOW}               INSTALLATION COMPLETE!                     ${NC}"
-echo -e "${GREEN}==========================================================${NC}"
-echo ""
-echo -e "${CYAN}NEXT STEPS:${NC}"
-echo " 1. Unplug the USB cable from your computer."
-echo " 2. Plug your Gamepad (USB-C or Bluetooth) into your phone."
-echo " 3. Toggle 'Gamepad Virtualization' ON inside NeuroPad!"
-echo ""
+# ---- 6. launch ------------------------------------------------------------
+info "[5/5] Starting NeuroPad..."
+"$ADB" shell am start -n "$PKG/.ui.MainActivity" --es neuropad_mode port5555 >/dev/null 2>&1 || true
+ok "NeuroPad is open on the phone"
+
+echo
+echo -e "${G}==========================================================${N}"
+echo -e "${Y}  Done!${N}"
+echo -e "${G}==========================================================${N}"
+echo " 1. Unplug the phone from the computer."
+echo " 2. Plug your USB gamepad into the phone."
+echo " 3. In NeuroPad, tap the big power button."
+echo
+echo " After a reboot of the phone, run activate_port_5555.sh again"
+echo " (or pair NeuroPad with Wireless debugging once and forget the computer)."
+echo
