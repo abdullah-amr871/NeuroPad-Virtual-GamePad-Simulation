@@ -59,7 +59,7 @@ Works with **XInput (Xbox-mode) USB gamepads**. Confirmed on the **GameSir G8 Pl
 
 ## Download
 
-**[Download NeuroPad 2.0.2](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/releases/tag/v2.0.2)** &nbsp;Â·&nbsp; [all releases](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/releases)
+**[Download NeuroPad 2.0.2](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/releases/tag/v2.0.2)** &nbsp;·&nbsp; [all releases](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/releases)
 
 | File | Use it when |
 | :--- | :--- |
@@ -253,8 +253,17 @@ zig cc -target aarch64-linux-musl -static -O2 -s -o app/src/main/assets/uinput_p
 
 Bug reports, controller test results and pull requests are welcome. Please include the diagnostics report when something does not work.
 
+## Support the project
+
+NeuroPad is free and always will be. If it brought rumble back to your controller and you'd like to say thanks, you can buy me a coffee:
+
+- ☕ **Ko-fi:** [ko-fi.com/abdullahamr871](https://ko-fi.com/abdullahamr871)
+- 💙 **PayPal:** abdullah.amr.makky@outlook.com
+
+A ⭐ on the repo helps just as much: it lets other people with the same problem find NeuroPad.
+
 ## License
 
-[MIT](LICENSE) Â© Abdullah Amr Maged.
+[MIT](LICENSE) © Abdullah Amr Maged.
 
 Xbox, PlayStation, DualShock, DualSense and GameSir are trademarks of their respective owners. NeuroPad is not affiliated with or endorsed by any of them.
