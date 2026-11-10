@@ -1,0 +1,60 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  app:
+    name: App (tests + APK)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Unit tests and screen rendering
+        run: ./gradlew :app:testDebugUnitTest -Pscreenshots --stacktrace
+      - name: Assemble
+        run: ./gradlew :app:assembleDebug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: NeuroPad-debug-apk
+          path: app/build/outputs/apk/debug/*.apk
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: screenshots
+          path: docs/screenshots/*.png
+          retention-days: 14
+
+  daemon:
+    name: Driver (C)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test JSON helpers
+        working-directory: daemon
+        run: cc -Wall -Wextra -o test_json test_json.c && ./test_json
+      - uses: mlugg/setup-zig@v2
+        with:
+          version: 0.14.0
+      - name: Cross-compile for Android
+        working-directory: daemon
+        run: |
+          zig cc -target aarch64-linux-musl -static -O2 -s -Wall -Wextra -o uinput_proto uinput_proto.c
+          file uinput_proto

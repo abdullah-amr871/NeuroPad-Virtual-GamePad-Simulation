@@ -1,221 +1,215 @@
-# 🎮 NeuroPad - Virtual GamePad Simulation
+<div align="center">
 
-[![Android Support](https://img.shields.io/badge/Android-8.0%20to%2016%2B-brightgreen.svg?logo=android&logoColor=white)](https://android.com)
-[![Root Requirement](https://img.shields.io/badge/Root-Not%20Required%20(Rootless%20ADB)-blue.svg)](https://developer.android.com/tools/adb)
-[![Kernel Subsystem](https://img.shields.io/badge/Kernel-UHID%20%2F%20evdev-orange.svg?logo=linux&logoColor=white)](https://www.kernel.org)
-[![Latency](https://img.shields.io/badge/Haptic%20Latency-4ms%20--%2012ms-purple.svg)](#force-feedback--haptics-engine)
-[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+<img src="docs/logo.svg" width="112" alt="NeuroPad logo">
 
-**NeuroPad brings rumble (vibration) back to USB gamepads on Android.** Built for and tested on the **GameSir G8 Plus (MFi)**.
+# NeuroPad
 
-On Android, a gamepad plugged in over **USB / Type-C** usually has **no working vibration**: games send rumble commands, but they never reach the controller's motors. NeuroPad fixes this by simulating a **wireless controller** (Xbox Wireless, DualShock 4, DualSense and others) that Android and games fully support with rumble. Your USB gamepad drives the virtual controller, and every rumble the game sends to it is routed back to your USB gamepad's motors.
+**Rumble for USB gamepads on Android. No root needed.**
 
-This repository provides the **Universal 1-Click Installer** package, allowing anyone on **Windows, macOS, or Linux** to install NeuroPad onto an Android phone and enable it in seconds. No root needed.
+[![Latest release](https://img.shields.io/github/v/release/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation?color=7C5CFF&label=download)](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/releases/latest)
+[![Build](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/actions/workflows/android.yml/badge.svg)](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/actions/workflows/android.yml)
+[![Android](https://img.shields.io/badge/Android-7.0%2B-34D399?logo=android&logoColor=white)](#requirements)
+[![Root](https://img.shields.io/badge/root-not%20required-22D3EE)](#how-it-gets-system-access)
+[![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
----
+</div>
 
-## ⚡ Why NeuroPad?
+Plug a USB-C gamepad into an Android phone and the buttons work, but the **vibration never does**: Android does not pass rumble on to most USB controllers. NeuroPad fixes that. It shows games a **virtual wireless controller** (Xbox or PlayStation) that Android fully supports, feeds it with your USB gamepad, and sends every rumble the game produces back to the motors of the real pad.
 
-### The problem
-* You plug a USB gamepad (or a USB-C telescopic grip) into your Android phone.
-* Buttons and sticks work, but **vibration never works** in any game, because Android doesn't forward rumble to most USB controllers.
+Built for, and tested on, the **GameSir G8 Plus (MFi)**.
 
-### The solution
-* NeuroPad creates a **virtual wireless controller** inside Android's kernel input system (`/dev/uhid`), which games see as a real Xbox or PlayStation controller with rumble support.
-* Your USB gamepad's input is fed into that virtual controller.
-* When a game vibrates the virtual controller, NeuroPad catches the rumble and **plays it on your USB gamepad's motors** in real time (4–12 ms).
+<p align="center">
+  <img src="docs/screenshots/home.png" width="24%" alt="Home screen">
+  <img src="docs/screenshots/controller.png" width="24%" alt="Live controller view">
+  <img src="docs/screenshots/connection.png" width="24%" alt="Connection screen">
+  <img src="docs/screenshots/settings.png" width="24%" alt="Settings screen">
+</p>
 
-### Features
-* **Zero Root Required:** Emulates an authentic controller using a local ADB loopback daemon (`adbd` on port `5555`). Root is fully supported as an optional fallback.
-* **Authentic Hardware Descriptors:** Spawns native virtual controllers with legitimate Vendor ID (VID) and Product ID (PID) descriptors.
-* **Sub-12ms Low-Latency Force Feedback:** Features a bi-directional haptics routing engine that reads kernel output reports (`FF_RUMBLE`) and actuates physical rumble motors with native responsiveness.
-* **1-Click Plug & Play:** Automated installers bundle portable platform tools — no manual SDK configuration or command-line gymnastics required.
+## Contents
 
----
+- [What it does](#what-it-does)
+- [Download](#download)
+- [Set up](#set-up)
+- [Tested controllers](#tested-controllers)
+- [Controller profiles](#controller-profiles)
+- [How it works](#how-it-works)
+- [What is new in 2.0](#what-is-new-in-20)
+- [FAQ](#faq)
+- [Build from source](#build-from-source)
+- [License](#license)
 
-## ✅ Tested Controllers
+## What it does
 
-NeuroPad was built for, and tested on, the **GameSir G8 Plus (MFi, Apple-certified)** USB-C gamepad.
+- **Rumble over USB.** Games vibrate the virtual controller; NeuroPad plays it on your gamepad within a few milliseconds.
+- **Five controller profiles.** Xbox 360, Xbox One, Xbox Series, DualShock 4 and DualSense, with the matching button prompts in games.
+- **No root.** The app talks to the phone's own ADB service on `127.0.0.1`. Root is supported too, if you have it.
+- **No computer needed on Android 11+.** Pair once with Wireless debugging and the app installs its own driver.
+- **Phone-vibration fallback.** For games that only vibrate the phone, that vibration is mirrored to the gamepad, split across the heavy and light motor.
+- **Button remapping.** Default, Nintendo (A/B and X/Y swapped) or a fully custom layout, including back paddles.
+- **Live controller view, rumble test and diagnostics** to see exactly what arrives and why something does not.
+- **Quick Settings tile** to switch the bridge on and off from inside a game.
+
+## Download
+
+**[Download the latest release](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/releases/latest)**
+
+| File | Use it when |
+| :--- | :--- |
+| `NeuroPad_2.0.0_OneClick_Installer.zip` | You have a computer nearby. Installs everything with one double-click. |
+| `NeuroPad_2.0.0.apk` | You want to install straight on the phone (Android 11+, Wireless debugging). |
+
+## Requirements
+
+- A phone with a **64-bit ARM** processor (practically every phone since 2017) and USB host (OTG) support.
+- Android 7.0 or newer. Setup without a computer needs Android 11 or newer.
+- A USB gamepad that speaks **XInput** (the Xbox 360 protocol).
+
+## Set up
+
+### Option A: with a computer (any Android version)
+
+1. On the phone, open **Settings > About phone** and tap **Build number** seven times. Then enable **USB debugging** in **Developer options**. On Xiaomi phones also enable *Install via USB* and *USB debugging (Security settings)*.
+2. Connect the phone to the computer and tap **Allow** on the phone.
+3. Extract the installer ZIP and run it:
+   - **Windows:** double-click `Install_NeuroPad.bat`
+   - **macOS / Linux:** `chmod +x install_neuropad.sh && ./install_neuropad.sh`
+4. Unplug the phone, plug the gamepad into it, open **NeuroPad** and tap the power button.
+
+Android closes the ADB port when the phone reboots. Afterwards, connect it again and run `Activate_Port_5555.bat` (or `activate_port_5555.sh`). Nothing is reinstalled.
+
+### Option B: on the phone only (Android 11+)
+
+1. Install `NeuroPad_2.0.0.apk`.
+2. Open the **Connection** tab, keep **Wireless debugging** selected and tap **Start pairing**.
+3. In Developer options, enable **Wireless debugging**, tap the text itself and choose **Pair device with pairing code**.
+4. Type the six digit code into the NeuroPad notification.
+5. Go back to NeuroPad and tap the power button.
+
+Wireless debugging needs a Wi-Fi connection. Without one, turn on your own mobile hotspot and enable *Offline mode* in the Connection tab.
+
+### Option C: rooted phones
+
+Choose **Root** in the Connection tab and grant superuser access. No ADB, Wi-Fi or computer is involved.
+
+## Tested controllers
 
 | Controller | Status |
 | :--- | :--- |
-| GameSir G8 Plus (MFi) | ✅ Tested and working (rumble included) |
-| Other USB gamepads | ⚠️ Not tested yet. They may work, but nothing is guaranteed |
+| GameSir G8 Plus (MFi) | Tested with NeuroPad 1.0, rumble included |
+| Other XInput USB gamepads | Not tested yet. They should work, but nothing is promised |
 
-Tried it with another controller? Please [open an issue](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/issues) and say whether buttons and rumble worked, so the list can grow.
+> **Status of 2.0:** version 2.0 is a full rewrite. Its logic is covered by unit tests and every screen is rendered in CI, but at the time of release it had not yet been run on a physical phone with a gamepad. If something does not work for you, please [open an issue](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/issues) and attach the report from **Settings > Diagnostics > Share report**. [Version 1.0](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/releases/tag/v1.0.0) stays available.
 
----
+Tried another controller? An issue that says whether buttons and rumble worked helps the list grow.
 
-## 📥 Download
+## Controller profiles
 
-**[⬇️ Download the latest NeuroPad 1-Click Installer (ZIP)](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/releases/latest)**
-
-1. Open the link above and download `NeuroPad_OneClick_Installer.zip` from the **Assets** list.
-2. Extract the whole ZIP to a folder (do not run the installer from inside the ZIP).
-3. Follow the Quick Start below.
-
-Prefer Git? `git clone https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation.git`
-
----
-
-## 🚀 Quick Start (1-Click Installation)
-
-### Step 1: Enable USB Debugging on Your Android Phone
-1. Open your phone's **Settings** ➔ **About Phone**.
-2. Tap **Build Number** 7 times until you see the message *"You are now a developer!"*.
-3. Go back to **Settings** ➔ **System** (or **Additional Settings**) ➔ **Developer Options**.
-4. Enable **USB Debugging** (and on Xiaomi/MIUI/HyperOS, enable **USB Debugging (Security settings)**).
-
-### Step 2: Connect Phone to PC
-Plug your phone into your computer via a standard USB data cable. Unlock your phone screen and tap **Always allow from this computer** when the authorization prompt appears.
-
-### Step 3: Run the 1-Click Installer
-
-#### 🪟 Windows (Batch / CMD)
-Double-click `Install_NeuroPad.bat`.
-
-#### 🟦 Windows (PowerShell)
-Right-click `Install_NeuroPad.ps1` ➔ **Run with PowerShell** (or run `powershell -ExecutionPolicy Bypass -File .\Install_NeuroPad.ps1`).
-
-#### 🍏 macOS & 🐧 Linux
-Open Terminal in the extracted folder and run:
-```bash
-chmod +x install_neuropad.sh
-./install_neuropad.sh
-```
-
-### Step 4: Play!
-1. Unplug the USB cable from your computer.
-2. Connect your USB gamepad to your phone (USB-C cable or OTG adapter).
-3. Open the **NeuroPad** app, pick a wireless controller profile (e.g. Xbox Wireless or DualSense), and toggle **Gamepad Virtualization** to **ON**. Rumble now reaches your USB gamepad.
-
----
-
-## 📦 Package Contents
-
-| File / Folder | Target OS | Description |
-| :--- | :--- | :--- |
-| `Install_NeuroPad.bat` | Windows | 1-Click automated CMD installer. Bundles ADB detection, daemon push, port 5555 activation, and APK install. |
-| `Install_NeuroPad.ps1` | Windows | PowerShell equivalent with rich color-coded status checks and hardware verification. |
-| `install_neuropad.sh` | Linux / macOS | POSIX bash script for Unix systems. |
-| `Activate_Port_5555.bat` | Windows | Fast utility to re-activate ADB TCP Port 5555 if you restart your phone. |
-| `Activate_Port_5555.ps1` | Windows | PowerShell utility for Port 5555 reactivation. |
-| `activate_port_5555.sh` | Linux / macOS | Shell utility for Port 5555 reactivation. |
-| `NeuroPad_App.apk` | Android | Patched, aligned, and signed production build of the NeuroPad Virtual Gamepad application. |
-| `uinput_proto` | Android (arm64-v8a) | Native User-space HID (`/dev/uhid`) kernel gamepad daemon binary. |
-| `tools/` | Windows | Portable Android Debug Bridge (`adb.exe` + DLL dependencies) — zero installation needed on PC. |
-| `src/daemon/` | Multi-platform | Full C source code (`uinput_proto.c`) and compilation guide for the native daemon. |
-| `docs/` | All | Deep technical architectural specifications (`ARCHITECTURE.md`). |
-
----
-
-## 🧠 System Architecture
-
-NeuroPad registers a virtual hardware gamepad directly within the Linux kernel via `/dev/uhid`, which is then surfaced to Android's `InputReader` as a first-class physical controller.
-
-```
-+-------------------------------------------------------------------------+
-|                           Android Application                           |
-|      [MainActivity UI] <----------> [VirtualGamepadService (Engine)]    |
-+-------------------------------------------------------------------------+
-                                      |
-                      (Local ADB Loopback :5555 OR Root su)
-                                      |
-                                      v
-                  +---------------------------------------+
-                  |   /data/local/tmp/uinput_proto        | (UID 2000 shell)
-                  +---------------------------------------+
-                                      |
-                              (/dev/uhid ioctl)
-                                      |
-                                      v
-                         +-------------------------+
-                         |       Linux Kernel      |
-                         |     (UHID / evdev)      |
-                         +-------------------------+
-                                      |
-                            (Android InputReader)
-                                      |
-                                      v
-                         +-------------------------+
-                         |      Android Games      |
-                         | (COD, Warzone, Emulators)|
-                         +-------------------------+
-```
-
----
-
-## 🎮 Supported Gamepad Profiles
-
-NeuroPad can emulate any of the following standard gaming hardware profiles:
-
-| Mode | Emulated Device | VID | PID | Connection Protocol |
+| Mode | Appears as | VID:PID | Bus | Notes |
 | :---: | :--- | :---: | :---: | :--- |
-| **0** | Microsoft Xbox 360 Controller | `0x045E` | `0x028E` | USB Native |
-| **1** | Microsoft Xbox Wireless Controller | `0x045E` | `0x02FD` | Bluetooth HID |
-| **2** | Sony DualShock 4 (PS4) | `0x054C` | `0x05C4` | Bluetooth HID |
-| **3** | Sony DualSense (PS5) | `0x054C` | `0x0CE6` | USB Native (`hid-playstation`) |
-| **4** | Microsoft Xbox Series X/S Controller | `0x045E` | `0x0B13` | Bluetooth BLE |
+| 0 | Xbox 360 Controller | `045E:028E` | USB | Most compatible. The default. |
+| 1 | Xbox Wireless Controller (Xbox One) | `045E:02FD` | Bluetooth | Trigger rumble is blended into the main motors. |
+| 2 | Sony DualShock 4 | `054C:05C4` | Bluetooth | PlayStation prompts. |
+| 3 | Sony DualSense (PS5) | `054C:0CE6` | USB | Uses the kernel's `hid-playstation` driver where present. |
+| 4 | Xbox Series X\|S Controller | `045E:0B13` | Bluetooth | Like mode 1, with the newer product ID. |
 
----
+If a game shows no rumble with one profile, try another: which profiles expose a vibrator depends on the HID drivers in your phone's kernel.
 
-## 📳 Force Feedback & Haptics Engine
+## How it works
 
-NeuroPad features a dedicated 4-layer force feedback pipeline engineered to eliminate rumble motor lock-ups and deliver realistic vibration:
-
-1. **Layer 1: Native Kernel UHID Output (4ms – 12ms latency)**  
-   Intercepts `ioctl(EVIOCSFF)` rumble structs (`struct ff_effect` / `FF_RUMBLE`) from the Android kernel via `uinput_proto` stdout, actuating the physical gamepad motors in real time.
-2. **Layer 2: Multi-Vendor System Property Override (Root Fallback)**  
-   Activates `log.tag.VibratorService DEBUG` and OEM vibration hal tags on Samsung, Xiaomi, Pixel, and OnePlus devices to prevent suppression of haptic waveform calls.
-3. **Layer 3: Intelligent Crossover Haptic Splitting (Logcat Fallback)**  
-   Converts single-channel phone vibration into balanced dual-motor gamepad rumble:
-   * **Low Vibration:** Weak high-frequency motor (right).
-   * **Medium Vibration:** Proportional baseline with primary motor scaling (left).
-   * **Heavy Vibration:** Full dual-motor amplitude with exponential smoothing.
-4. **Layer 4: Built-in Watchdog Handler**  
-   Automatically clears motor vibration if no fresh reports arrive within timeout intervals, guaranteeing motors never get stuck buzzing.
-
----
-
-## ❓ Frequently Asked Questions (FAQ)
-
-### Do I need to re-run the installer after rebooting my phone?
-Android closes TCP port 5555 when the device completely reboots. If you reboot your phone:
-1. Reconnect your phone via USB to your PC.
-2. Double-click **`Activate_Port_5555.bat`** (takes only 2 seconds!).
-3. Unplug USB and game on. You do **not** need to reinstall the APK or re-copy files.
-
-### Does this require Root?
-**No.** Root is completely optional. The installer leverages Android's built-in ADB loopback permission (`UID 2000 shell`), which possesses full read/write rights to `/dev/uhid`.
-
-### The installer says `adb.exe could not be found`?
-Make sure you extract the downloaded release ZIP file completely before running the installer. Keep the `tools` folder in the same directory as `Install_NeuroPad.bat`.
-
-### The app says `HID Process: Disconnected`?
-1. Verify that your phone is connected and authorized.
-2. If using Port 5555, run `Activate_Port_5555.bat`.
-3. If on MIUI / HyperOS, ensure **USB Debugging (Security Settings)** is toggled ON in Developer Options.
-
----
-
-## 🛠️ Building the Kernel Daemon from Source
-
-If you prefer to inspect and compile `uinput_proto` yourself:
-
-```bash
-# Clone the repository
-git clone https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation.git
-cd NeuroPad-Virtual-GamePad-Simulation/src/daemon
-
-# Compile with Zig (static arm64 musl binary)
-zig cc -target aarch64-linux-musl -static -O3 -o uinput_proto uinput_proto.c
+```
+ USB gamepad                NeuroPad app                   Android
+ -----------               ---------------               -----------
+   buttons  --- XInput -->  UsbGamepadManager
+                            XInputParser
+                            ReportBuilder  --- JSON --->  uinput_proto  --> /dev/uhid --> kernel HID driver --> games
+                                                          (shell user)
+   motors   <-- rumble ---  RumbleParser   <-- JSON ----  uinput_proto  <-- output reports <-- game rumble
 ```
 
-For more details on internal drivers and architecture, see [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+1. The app claims the gamepad's XInput interface through the USB host API. That also detaches the kernel's own driver, so games do not see the pad twice.
+2. A small native program, [`uinput_proto`](daemon/), creates the virtual controller through `/dev/uhid`. Only the Android *shell* user (or root) may open that device, which is why the program is started through ADB.
+3. Input reports flow from the pad to the virtual controller; output (rumble) reports flow back and are written to the pad's motors.
 
----
+More detail is in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
-## 📄 License
+### How it gets system access
 
-This project is licensed under the [MIT License](LICENSE).
-All product and company names are trademarks™ or registered® trademarks of their respective holders. Use of them does not imply any affiliation with or endorsement by them.
+| Mode | What happens | Survives a reboot |
+| :--- | :--- | :---: |
+| Wireless debugging | The app pairs with the phone's ADB service like a computer would, over `127.0.0.1`. | Yes, when Wireless debugging is on |
+| PC port 5555 | A computer runs `adb tcpip 5555` once; the app connects to that port. | No, run the activator again |
+| Root | The driver is started with `su`. | Yes |
+
+Nothing is sent off the device. The only network connections the app makes are to `127.0.0.1`.
+
+## What is new in 2.0
+
+Version 1.0 only existed as a patched binary. Version 2.0 is a from-scratch, open-source rewrite in Kotlin with every 1.0 feature carried over.
+
+- **New interface:** four clear tabs, a live picture of your controller, rumble meters and a test button.
+- **Setup without a computer:** the app installs its driver over its own ADB link.
+- **Long rumbles are no longer cut off.** 1.0 stopped every vibration after half a second.
+- **Rumble no longer goes missing** after a notification or keyboard vibration.
+- **Adjustable strength**, stuck-motor guard and fallback thresholds.
+- **Safer:** 1.0 could delete unrelated input devices on rooted phones until the next reboot. That code is gone.
+- **Clear error messages** instead of a silent "Disconnected", automatic reconnect, and a shareable diagnostics report.
+
+The full list, including every bug fixed, is in the [changelog](CHANGELOG.md).
+
+## FAQ
+
+**Do I need root?**
+No. Root is optional.
+
+**I rebooted the phone and the bridge does not start.**
+In *PC port 5555* mode, run the port activator from the computer again. In *Wireless debugging* mode, switch Wireless debugging back on (Android turns it off when Wi-Fi drops); the app reconnects by itself.
+
+**The gamepad works but there is no rumble in my game.**
+Tap the test buttons on the Home tab first. If the pad vibrates, the hardware path is fine: try another controller profile, and check **Settings > Diagnostics** to see whether rumble commands arrive at all. Some games simply have no controller rumble; for those, keep *Mirror phone vibration* on.
+
+**The rumble is too weak or too strong.**
+Change **Settings > Rumble > Strength**.
+
+**The app says the driver is not installed.**
+Run the PC installer once, or use Wireless debugging so the app can install it.
+
+**Does it work with Bluetooth gamepads?**
+NeuroPad bridges USB gamepads. Bluetooth controllers usually have working rumble on Android already.
+
+**Is it safe?**
+The app is open source, needs no account, shows no ads and does not talk to the internet. The `INTERNET` permission is required for the loopback connection to ADB.
+
+## Build from source
+
+```bash
+git clone https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation.git
+cd NeuroPad-Virtual-GamePad-Simulation
+./gradlew :app:assembleRelease          # APK in app/build/outputs/apk/release
+./gradlew :app:testDebugUnitTest        # unit tests
+```
+
+You need JDK 17 and the Android SDK (platform 35). Without a keystore the release build is signed with the debug key; see `app/build.gradle.kts` for using your own.
+
+The prebuilt driver is checked in at `app/src/main/assets/uinput_proto`. To rebuild it you only need [Zig](https://ziglang.org/download/):
+
+```bash
+zig cc -target aarch64-linux-musl -static -O2 -s -o app/src/main/assets/uinput_proto daemon/uinput_proto.c
+```
+
+| Path | Contents |
+| :--- | :--- |
+| `app/` | The Android app (Kotlin, Jetpack Compose) |
+| `daemon/` | The native UHID driver (C) and its test |
+| `installer/` | One-click installer scripts and a portable `adb` for Windows |
+| `scripts/` | Release packaging and resource generation |
+| `docs/` | Architecture notes and screenshots |
+
+## Contributing
+
+Bug reports, controller test results and pull requests are welcome. Please include the diagnostics report when something does not work.
+
+## License
+
+[MIT](LICENSE) © Abdullah Amr Maged.
+
+Xbox, PlayStation, DualShock, DualSense and GameSir are trademarks of their respective owners. NeuroPad is not affiliated with or endorsed by any of them.
