@@ -6,7 +6,7 @@
 
 **Rumble for USB gamepads on Android. No root needed.**
 
-[![Latest release](https://img.shields.io/github/v/release/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation?color=7C5CFF&label=download)](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/releases/latest)
+[![Release](https://img.shields.io/github/v/release/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation?include_prereleases&color=7C5CFF&label=download)](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/releases)
 [![Build](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/actions/workflows/android.yml/badge.svg)](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/actions/workflows/android.yml)
 [![Android](https://img.shields.io/badge/Android-7.0%2B-34D399?logo=android&logoColor=white)](#requirements)
 [![Root](https://img.shields.io/badge/root-not%20required-22D3EE)](#how-it-gets-system-access)
@@ -51,7 +51,7 @@ Built for, and tested on, the **GameSir G8 Plus (MFi)**.
 
 ## Download
 
-**[Download the latest release](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/releases/latest)**
+**[Download NeuroPad 2.0.0](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/releases/tag/v2.0.0)** &nbsp;·&nbsp; [all releases](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/releases)
 
 | File | Use it when |
 | :--- | :--- |
