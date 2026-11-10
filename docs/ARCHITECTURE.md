@@ -1,112 +1,138 @@
-# NeuroPad: Comprehensive Architecture & Design Walkthrough
+# NeuroPad architecture
 
-This document compiles everything known about the **NeuroPad** Android application, detailing its systems architecture, input virtualization pipeline, loopback mechanisms, button mapping engine, and the redesigned force-feedback redirection stack.
-
----
-
-## 1. High-Level Architecture Overview
-
-NeuroPad is a system-level virtual gamepad driver for Android. It operates as a bridge between physical game controllers (connected via USB Host or Bluetooth) and the Android kernel's Input Subsystem, allowing users to emulate standard gamepads (Xbox 360, Xbox One, DualShock 4, DualSense, Xbox Series X/S) system-wide.
+NeuroPad has two halves: an Android app that owns the USB gamepad, and a tiny native
+program (`uinput_proto`) that owns the virtual controller. They talk over a pipe.
 
 ```
-+-------------------------------------------------------------+
-|                     Android Application                     |
-|  [MainActivity UI] <-> [VirtualGamepadService (Kotlin/Java)]|
-+-------------------------------------------------------------+
-                               |
-            (Root Shell 'su' OR Local ADB Loopback)
-                               |
-                               v
-             +----------------------------------+
-             |        /system/bin/hid           | (Shell/Root UID)
-             +----------------------------------+
-                               |
-                        (/dev/uhid JNI)
-                               |
-                               v
-                     +------------------+
-                     |  Linux Kernel    |
-                     |  (evdev/UHID)    |
-                     +------------------+
-                               |
-                     (Android InputReader)
-                               |
-                               v
-                     +------------------+
-                     |  Android Games   |
-                     +------------------+
+                         app process (normal app uid)                    shell uid / root
+ +-------------+   USB   +-------------------------------------+  JSON   +--------------+   /dev/uhid   +--------+
+ | USB gamepad | <-----> | UsbGamepadManager -> BridgeSession  | <-----> | uinput_proto | <-----------> | kernel |
+ +-------------+  XInput | XInputParser, ReportBuilder,        |  lines  +--------------+               +--------+
+                         | RumbleParser, PhoneVibrationMirror  |                                             |
+                         +-------------------------------------+                                    InputReader, games
 ```
 
----
+## Why a separate program?
 
-## 2. Core Architectural Components
+Creating an input device needs write access to `/dev/uhid`. On Android that is granted to
+the `shell` user (uid 2000) and to root, never to an installed app. So the app obtains a
+shell in one of three ways and runs the driver there:
 
-### A. MainActivity (UI & Controller Dashboard)
-* **Purpose:** Serves as the user-facing configuration console and input monitor.
-* **Key Features:**
-  * Displays active emulation modes, layout settings (Default, Nintendo, Custom), and connection toggles.
-  * Monitors real-time analog stick axes ($LX, LY, RX, RY$), D-pad directions, and button presses.
-  * Displays real-time haptic motor intensities ($Left, Right$ rumble bars).
-  * Houses the **hidden Developer Diagnostics screen** (triggered by tapping the *HID Process* status text view).
+| Mode | Transport | Class |
+| :--- | :--- | :--- |
+| Wireless debugging | ADB over TLS to `127.0.0.1:<random port>`, found through mDNS, paired with a six digit code | `AdbConnectionManager`, `AdbDiscovery`, `AdbPairingService` |
+| PC port 5555 | ADB to `127.0.0.1:5555` after `adb tcpip 5555` from a computer | `AdbConnectionManager` |
+| Root | `su` | `Shell` |
 
-### B. VirtualGamepadService (Virtualization Controller)
-* **Purpose:** Manages the lifecycle of the virtual controller.
-* **Input Injection:** When physical inputs arrive, it formats them into a binary HID input report and writes it to the standard input (stdin) of `/system/bin/hid`.
-* **Output Reading:** It reads `/system/bin/hid`'s standard output (stdout), which outputs JSON messages when the Android kernel transmits HID Output Reports (like rumble requests) back to the virtual device.
-* **Fail-Safe Watchdog:** Implements `rumbleWatchdogHandler` to automatically reset rumble intensities to `0` if no fresh reports are received within a set timeout, preventing gamepad motors from getting stuck vibrating.
+`Shell` hides the difference. `DaemonInstaller` makes sure `/data/local/tmp/uinput_proto`
+matches the copy bundled in the APK (compared by size) and installs it if needed.
 
-### C. The Local ADB / Root loopback
-Registering virtual devices on Android requires write access to the kernel's userspace HID node (`/dev/uhid`). Regular Android applications do not have this permission. NeuroPad bypasses this security boundary using one of two methods:
-1. **Root Mode (`su`):** If root is available, the app directly spawns `/system/bin/hid -` inside a superuser shell.
-2. **ADB Mode (Rootless Loopback):** The app starts a dynamic loopback connection to the local Android Debug Bridge daemon (`adbd` on port `5555` or a dynamically discovered pairing port). Since the `shell` UID has `/dev/uhid` permissions, spawning `/system/bin/hid` over the local ADB stream successfully registers the virtual gamepad.
+## The driver protocol
 
----
+One JSON object per line, in both directions. It is a superset of what AOSP's
+`/system/bin/hid` understands.
 
-## 3. Emulation Modes & Protocols
+App to driver:
 
-NeuroPad supports five distinct controller configurations:
+```json
+{"id":1,"command":"register","name":"Xbox Wireless Controller","vid":1118,"pid":765,"bus":"bluetooth","descriptor":[5,1,9,5]}
+{"id":1,"command":"report","report":[1,128,128,128,128,0,0,8,0,0]}
+{"command":"get_report_reply","id":7,"err":0,"report":[5,30,0]}
+{"command":"set_report_reply","id":8,"err":0}
+```
 
-| Emulation Mode | Emulated Device | Connection Type | Vendor ID (VID) | Product ID (PID) |
-| :--- | :--- | :--- | :--- | :--- |
-| **0** | Xbox 360 Controller | USB | `0x045E` | `0x028E` |
-| **1** | Xbox Wireless Controller | Bluetooth | `0x045E` | `0x02FD` |
-| **2** | Sony DualShock 4 | Bluetooth | `0x054C` | `0x05C4` |
-| **3** | Sony DualSense PS5 | USB | `0x054C` | `0x0CE6` |
-| **4** | Xbox Wireless Controller | Bluetooth | `0x045E` | `0x0B13` |
+Driver to app:
 
----
+```json
+{"event":"ready","version":"2.0.0"}
+{"event":"registered"}
+{"event":"error","message":"cannot open /dev/uhid: Permission denied"}
+{"event":"output","id":1,"reportData":[3,15,0,0,83,58,255,0,0,0,0,0,0,0,0,0]}
+{"event":"get_report","id":7,"reportId":5,"reportType":0}
+{"event":"set_report","id":8,"reportId":2,"reportType":1,"reportData":[2,255]}
+```
 
-## 4. Redesigned Haptics & Force Feedback Stack
+The app first tries ADB's raw `exec:` service (no terminal in between). If the driver
+does not greet it, it falls back to the terminal-backed `shell:` service that 1.0 used;
+a 1.0 driver, which prints no greeting, is still accepted.
 
-The vibration engine operates in four prioritized layers, designed to optimize fidelity and latency depending on device capabilities:
+## Input path
 
-### Layer 1: Native Force Feedback & HID Output Report Routing (Highest Priority)
-* **Execution Path:**
-  1. Game requests rumble via Android `InputDevice.getVibrator()`.
-  2. AOSP compiles the command into a Linux force feedback rumble struct (`struct ff_effect` of type `FF_RUMBLE`) and calls `ioctl(fd, EVIOCSFF)` on the input node.
-  3. The kernel HID driver (e.g. `hid-sony` or `hid-playstation`) translates the evdev event into a standard HID Output Report (Report ID 17/5 for DS4, Report ID 2 for DualSense).
-  4. The report is written to `/dev/uhid`, read by `/system/bin/hid`, and written to stdout as JSON.
-  5. NeuroPad's `VirtualGamepadService` intercepts this stdout report, extracts raw left/right motor values, and writes them directly to the physical controller.
-* **Latency:** **4ms - 12ms** (Direct Kernel routing).
+1. `UsbGamepadManager` claims the XInput interface (class `0xFF`, subclass `0x5D`,
+   protocol `1`) with `force = true` and polls its interrupt IN endpoint on a
+   high-priority thread.
+2. `XInputParser` turns the 20-byte Xbox 360 packet into a `PadState`: sticks and triggers
+   as 0..255, the D-pad as a hat value, and 16 logical buttons.
+3. `ReportBuilder` applies the button layout and the Select + Start shortcut, then
+   produces the input report of the selected profile:
 
-### Layer 2: System Property Activation (Root Fallback)
-* **Execution Path:** During startup in Root Mode, `HapticRedirector` executes `setprop log.tag.VibratorService DEBUG` (and related `VibratorHal` / `Vibrator` tags).
-* **Purpose:** Forces multi-vendor Android ROMs (Samsung, Xiaomi, Pixel, OnePlus) to log vibration command arguments (`OneShot` or `Waveform` objects) to the system Logcat buffer, bypassing OEM log-suppression rules.
+   | Profile | Report | Layout |
+   | :--- | :--- | :--- |
+   | Xbox 360 / One / Series | 10 bytes | id, LX, LY, RX, RY, LT, RT, hat, buttons (2 bytes) |
+   | DualShock 4 | 10 bytes | same axes, Sony button order |
+   | DualSense | 64 bytes | axes, sequence counter, hat + buttons (3 bytes), zero padding |
 
-### Layer 3: Haptic Splitting Crossover (Logcat Fallback)
-* **Execution Path:** Used when native `EV_FF` is unavailable (e.g., rootless Xbox Bluetooth emulations). NeuroPad spawns a Logcat reader thread.
-* **Splitting Algorithm:** The single-channel phone vibration amplitude (0-255) is split into a strong low-frequency (left) and weak high-frequency (right) dual-motor gamepad output:
-  * **Low Vibration (< Threshold 1):** Routes exclusively to the right motor at scaled intensity.
-  * **Medium Vibration (Threshold 1 to 2):** Runs the right motor at baseline, scales up the left motor proportionally.
-  * **Heavy Rumble (> Threshold 2):** Drives both motors at full amplitude.
-  * **Smoothing Filter:** Applies exponential decay smoothing ($left = (1 - \alpha) \cdot left + \alpha \cdot lastLeft$) to prevent sudden motor jumps during step transitions.
-* **Latency:** **25ms - 50ms** (Logcat processing overhead).
+4. The report is written to the driver as one `report` line; the driver forwards it to the
+   kernel as `UHID_INPUT`.
 
-### Layer 4: Real-time Developer Diagnostics & Stack Tracer
-* **Diagnostic Screen:** Tapping the *HID Process* status text displays a diagnostic panel probing:
-  * Active capability checks (Root status, ADB status, `/dev/uhid` / `/dev/uinput` writability).
-  * EV_FF kernel support and `InputDevice.hasVibrator()` registration.
-  * Running haptic backend, protocol, and real-time millisecond latency samples.
-* **Input Stack Tracer:** Every haptic call logs a trace route:
-  `[HapticTracer] Native HID Output Path: Game -> [Android HID Subsystem] -> UHID Output Received -> NeuroPad -> Physical Controller`
-* **Exporting Reports:** Saves diagnostics reports to `neuropad_haptics_report.txt` in the app's external files directory for bug reproduction.
+The driver patches the Microsoft descriptors on the fly so that Android maps the right
+stick to Z/Rz and the triggers to Brake/Gas, and it clears the digital LT/RT bits because
+the analog axes already carry them.
+
+## Rumble path
+
+A game calls `Vibrator` on the virtual controller. Android writes a force-feedback effect
+to the kernel HID driver, which emits an output report. The driver passes it to the app as
+an `output` event and `RumbleParser` decodes it:
+
+| Profile | Report id | Left (heavy) | Right (light) |
+| :--- | :---: | :--- | :--- |
+| DualSense | `0x02` | byte 4 | byte 3 |
+| DualShock 4 | `0x11` / `0x05` | byte 7 / 5 | byte 6 / 4 |
+| Xbox One / Series | `0x03` | byte 4 (0..100) | byte 5 (0..100), plus trigger motors in bytes 2 and 3 |
+| Xbox 360 | none | byte 3 or 1 | byte 4 or 2 |
+
+The values are multiplied by the user's gain and written to the pad as the Xbox 360 rumble
+packet `00 08 00 LL RR 00 00 00`. A guard timer switches the motors off if nothing arrives
+for a while (5 s by default), in case a stop report gets lost.
+
+### Phone-vibration fallback
+
+Some games never use controller rumble and only vibrate the phone. `PhoneVibrationMirror`
+follows `logcat` for the system vibrator's log lines through the same shell,
+`VibrationLogParser` extracts one-shot and waveform effects (and RichTap calls on phones
+that use it), and `HapticSplitter` turns the single amplitude into two motor values:
+
+- quiet effects: light motor only,
+- medium effects: light motor plus a fading-in heavy motor,
+- strong effects: both motors.
+
+Vibrations requested by the system UI or the keyboard are ignored, and the whole fallback
+pauses for the session once real controller rumble has been seen.
+
+## App structure
+
+```
+app/src/main/java/io/github/abdullahamr871/neuropad/
+  core/      pure Kotlin, no Android: profiles, descriptors, parsers, protocol (unit tested)
+  usb/       UsbGamepadManager
+  adb/       ADB client, mDNS discovery, pairing service
+  bridge/    GamepadBridgeService (foreground), BridgeSession, Shell, DaemonInstaller,
+             Settings, BridgeState (StateFlows observed by the UI), Quick Settings tile
+  haptics/   PhoneVibrationMirror, Diagnostics
+  ui/        Compose screens and AppViewModel
+```
+
+`BridgeState` is the single source of truth for the UI: status, ADB state, the live pad
+state, rumble levels, counters and the activity log.
+
+## Testing
+
+- `app/src/test/.../core` covers the input path, the rumble path and the protocol.
+- `ScreenshotTest` renders all four screens on the JVM with Robolectric and Roborazzi
+  (`./gradlew :app:testDebugUnitTest -Pscreenshots`), which also produces the images in
+  `docs/screenshots`.
+- `daemon/test_json.c` tests the driver's JSON helpers on any host.
+
+What cannot be tested without hardware: the USB transfer itself, the ADB transports and
+the behaviour of each phone's kernel HID drivers.

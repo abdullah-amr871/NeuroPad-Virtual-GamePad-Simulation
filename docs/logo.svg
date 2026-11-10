@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108" width="216" height="216" role="img" aria-label="NeuroPad">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7C5CFF"/>
+      <stop offset="0.55" stop-color="#4F46E5"/>
+      <stop offset="1" stop-color="#0EA5C9"/>
+    </linearGradient>
+  </defs>
+  <rect width="108" height="108" rx="26" fill="url(#bg)"/>
+  <circle cx="54" cy="54" r="38" fill="#FFFFFF" fill-opacity="0.08"/>
+  <g transform="translate(54 55) scale(0.86) translate(-54 -55)" fill="none" stroke-linecap="round">
+    <path fill="#FFFFFF" fill-rule="evenodd" d="M38,42h32a14,14 0,0 1,14 14l2,10a6,6 0,0 1,-11 4l-5,-8h-32l-5,8a6,6 0,0 1,-11 -4l2,-10a14,14 0,0 1,14 -14zM38.4,47h3.2v3.4h3.4v3.2h-3.4v3.4h-3.2v-3.4h-3.4v-3.2h3.4zM65,55m-2.8,0a2.8,2.8 0,1 0,5.6 0a2.8,2.8 0,1 0,-5.6 0M71.5,49.5m-2.8,0a2.8,2.8 0,1 0,5.6 0a2.8,2.8 0,1 0,-5.6 0"/>
+    <path stroke="#FFFFFF" stroke-width="3.4" d="M15,45q-5,10 0,20M93,45q5,10 0,20"/>
+    <path stroke="#FFFFFF" stroke-opacity="0.6" stroke-width="3.4" d="M7,40q-8,15 0,30M101,40q8,15 0,30"/>
+  </g>
+</svg>
