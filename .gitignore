@@ -20,3 +20,21 @@ Thumbs.db
 .idea/
 *.sublime-project
 *.sublime-workspace
+
+# Android / Gradle
+.gradle/
+build/
+local.properties
+*.iml
+captures/
+.kotlin/
+
+# Signing material must never be committed
+*.jks
+*.keystore
+keystore.properties
+
+# Build outputs (published through GitHub Releases instead)
+*.apk
+*.aab
+dist/
