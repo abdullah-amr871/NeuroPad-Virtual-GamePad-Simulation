@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Link
 import androidx.compose.material.icons.rounded.SportsEsports
@@ -91,12 +92,14 @@ class MainActivity : ComponentActivity() {
                     "Controller" to Icons.Rounded.SportsEsports,
                     "Connection" to Icons.Rounded.Link,
                     "Settings" to Icons.Rounded.Tune,
+                    "Support" to Icons.Rounded.Favorite,
                 )
                 val screen: @Composable () -> Unit = {
                     when (tab) {
                         AppViewModel.TAB_HOME -> HomeScreen(vm, onStart = ::startBridge) { tab = it }
                         AppViewModel.TAB_CONTROLLER -> ControllerScreen(vm)
                         AppViewModel.TAB_CONNECTION -> ConnectionScreen(vm)
+                        AppViewModel.TAB_SUPPORT -> SupportScreen(vm)
                         else -> SettingsScreen(vm, onQuit = ::quit)
                     }
                 }
