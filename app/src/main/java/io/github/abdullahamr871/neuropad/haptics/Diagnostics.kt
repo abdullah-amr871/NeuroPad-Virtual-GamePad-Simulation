@@ -103,7 +103,7 @@ object Diagnostics {
         appendLine("Layout: ${settings.layoutMode.label}")
         appendLine("Access: ${settings.accessMode.label}, port ${settings.adbPort}")
         appendLine("Driver version: ${BridgeState.daemonVersion.value ?: "unknown / not running"}")
-        appendLine("Rumble gain: ${settings.rumbleGain}, guard: ${settings.rumbleTimeoutMs} ms, fallback: ${settings.phoneVibrationFallback}")
+        appendLine("Rumble gain: ${settings.rumbleGain}, guard: ${settings.rumbleTimeoutMs} ms, fallback: ${settings.phoneVibrationFallback}, phone rumble: ${settings.phoneRumble}")
         appendLine()
 
         appendLine("--- Rumble chain ---")

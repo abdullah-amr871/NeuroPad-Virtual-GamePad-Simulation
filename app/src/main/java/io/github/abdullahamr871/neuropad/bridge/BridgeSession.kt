@@ -12,6 +12,7 @@ import io.github.abdullahamr871.neuropad.core.PadState
 import io.github.abdullahamr871.neuropad.core.ReportBuilder
 import io.github.abdullahamr871.neuropad.core.RumbleParser
 import io.github.abdullahamr871.neuropad.core.XInputParser
+import io.github.abdullahamr871.neuropad.haptics.PhoneRumble
 import io.github.abdullahamr871.neuropad.haptics.PhoneVibrationMirror
 import io.github.abdullahamr871.neuropad.usb.UsbGamepadManager
 import org.json.JSONArray
@@ -49,6 +50,8 @@ class BridgeSession(
     @Volatile private var rumbleTimeoutMs = settings.rumbleTimeoutMs
     @Volatile private var minPulseMs = settings.minPulseMs
     @Volatile private var muteSystem = settings.muteSystemHaptics
+    private val phoneRumble = PhoneRumble(context)
+    @Volatile private var phoneRumbleOn = false
 
     // Controller-rumble state (guarded by rumbleLock).
     private val rumbleLock = Any()
@@ -379,6 +382,8 @@ class BridgeSession(
 
     private fun applyRumble(left: Int, right: Int, source: RumbleSource) {
         usb.writeRumble(left, right)
+        // Vibration that came from the phone in the first place is not played back on it.
+        if (phoneRumbleOn && source != RumbleSource.PHONE_VIBRATION) phoneRumble.set(left, right)
         BridgeState.rumble.value = RumbleState(left, right, if (left > 0 || right > 0) source else RumbleSource.NONE)
         synchronized(scheduler) {
             watchdog?.cancel(false)
@@ -387,6 +392,7 @@ class BridgeSession(
             if ((left > 0 || right > 0) && timeout > 0 && !scheduler.isShutdown) {
                 watchdog = scheduler.schedule({
                     usb.writeRumble(0, 0)
+                    phoneRumble.off()
                     BridgeState.rumble.value = RumbleState()
                 }, timeout.toLong(), TimeUnit.MILLISECONDS)
             }
@@ -401,6 +407,7 @@ class BridgeSession(
                 watchdog?.cancel(false)
                 watchdog = scheduler.schedule({
                     usb.writeRumble(0, 0)
+                    phoneRumble.off()
                     BridgeState.rumble.value = RumbleState()
                 }, durationMs, TimeUnit.MILLISECONDS)
             }
@@ -422,6 +429,19 @@ class BridgeSession(
         splitter.lowThreshold = settings.hapticLowThreshold
         splitter.highThreshold = settings.hapticHighThreshold
         splitter.smoothing = settings.hapticSmoothing
+        val wantPhone = settings.phoneRumble
+        val blocked = wantPhone && PhoneRumble.inputDevicesTakeVibration(context)
+        val on = wantPhone && !blocked && phoneRumble.available
+        if (on != phoneRumbleOn) {
+            phoneRumbleOn = on
+            if (!on) phoneRumble.off()
+            if (on) BridgeState.log("Haptics", "Rumble also plays on the phone")
+        }
+        if (blocked) {
+            BridgeState.log("Haptics", "Rumble on the phone is paused: turn off \"Vibrate input devices\" in Developer options")
+        } else if (wantPhone && !phoneRumble.available) {
+            BridgeState.log("Haptics", "Rumble on the phone: this phone reports no vibration motor")
+        }
     }
 
     // ---- USB side ------------------------------------------------------------------------
@@ -514,6 +534,7 @@ class BridgeSession(
         mirror?.stop()
         mirror = null
         usb.writeRumble(0, 0)
+        phoneRumble.off()
         usb.disconnect()
         usb.unregister()
         closeProcess()

@@ -28,6 +28,7 @@ import io.github.abdullahamr871.neuropad.core.EmulationProfile
 import io.github.abdullahamr871.neuropad.core.LayoutMode
 import io.github.abdullahamr871.neuropad.haptics.Check
 import io.github.abdullahamr871.neuropad.haptics.Diagnostics
+import io.github.abdullahamr871.neuropad.haptics.PhoneRumble
 import io.github.abdullahamr871.neuropad.usb.UsbGamepadManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -55,6 +56,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     var autoStart by mutableStateOf(settings.autoStart); private set
     var minPulseMs by mutableIntStateOf(settings.minPulseMs); private set
     var muteSystemHaptics by mutableStateOf(settings.muteSystemHaptics); private set
+    var phoneRumble by mutableStateOf(settings.phoneRumble); private set
     var paired by mutableStateOf(settings.paired); private set
 
     /** Name of a compatible pad that is plugged in (whether or not the bridge runs). */
@@ -209,6 +211,14 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     fun updateHomeCombo(value: Boolean) { homeCombo = value; settings.homeCombo = value; GamepadBridgeService.reload(context) }
     fun updateMinPulse(value: Int) { minPulseMs = value; settings.minPulseMs = value; GamepadBridgeService.reload(context) }
     fun updateMuteSystem(value: Boolean) { muteSystemHaptics = value; settings.muteSystemHaptics = value; GamepadBridgeService.reload(context) }
+    fun updatePhoneRumble(value: Boolean) {
+        phoneRumble = value
+        settings.phoneRumble = value
+        GamepadBridgeService.reload(context)
+        if (value && PhoneRumble.inputDevicesTakeVibration(context)) {
+            say("Turn off \"Vibrate input devices\" in Developer options, otherwise Android sends this vibration to the controller.")
+        }
+    }
     fun updateAutoStart(value: Boolean) { autoStart = value; settings.autoStart = value }
     fun updateFallback(value: Boolean) {
         phoneFallback = value

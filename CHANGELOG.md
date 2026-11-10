@@ -1,5 +1,21 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- **Rumble on the phone too** (Settings > Rumble). Plays game rumble on the phone's own
+  vibration motor as well, for gamepads without rumble motors
+  ([#8](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/issues/8)).
+  It pauses itself while Android's "Vibrate input devices" is on, because Android would
+  send that vibration straight back to the virtual controller.
+
+### Fixed
+
+- The README listed the 8BitDo Ultimate Mobile as a controller with rumble. It has no rumble
+  motors and connects over Bluetooth only, so it was removed
+  ([#8](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/issues/8)).
+
 ## 2.0.3
 
 ### Added
