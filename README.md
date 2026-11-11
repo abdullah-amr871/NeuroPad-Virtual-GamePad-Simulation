@@ -6,6 +6,10 @@
 
 **Rumble for USB gamepads on Android. No root needed.**
 
+USB controller not vibrating in Android games? NeuroPad fixes it.
+
+[Website](https://abdullah-amr871.github.io/NeuroPad-Virtual-GamePad-Simulation/) &nbsp;·&nbsp; [Download](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/releases/latest)
+
 [![Release](https://img.shields.io/github/v/release/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation?include_prereleases&color=7C5CFF&label=download)](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/releases)
 [![Build](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/actions/workflows/android.yml/badge.svg)](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/actions/workflows/android.yml)
 [![Android](https://img.shields.io/badge/Android-7.0%2B-34D399?logo=android&logoColor=white)](#requirements)
@@ -198,6 +202,9 @@ Version 1.0 only existed as a patched binary. Version 2.0 is a from-scratch, ope
 The full list, including every bug fixed, is in the [changelog](CHANGELOG.md).
 
 ## FAQ
+
+**Why does my USB controller not vibrate on Android?**
+Android passes the buttons of most USB gamepads to games, but not rumble. NeuroPad shows games a virtual Xbox or PlayStation controller that Android fully supports and sends the rumble back to your gamepad, so it vibrates again.
 
 **Do I need root?**
 No. Root is optional.
