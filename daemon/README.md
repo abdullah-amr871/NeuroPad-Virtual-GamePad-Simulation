@@ -1,6 +1,6 @@
 # uinput_proto
 
-The native half of NeuroPad: a static ARM64 program that creates the virtual controller
+The native half of NeuroPad: a static ARM program (64-bit and 32-bit builds) that creates the virtual controller
 through `/dev/uhid` and relays HID reports between the kernel and the app.
 
 It reads commands as JSON lines on stdin and prints events as JSON lines on stdout; the
@@ -13,7 +13,8 @@ destroys the virtual controller.
 Only [Zig](https://ziglang.org/download/) is needed (it bundles a C compiler and musl):
 
 ```bash
-zig cc -target aarch64-linux-musl -static -O2 -s -o uinput_proto uinput_proto.c
+zig cc -target aarch64-linux-musl -static -O2 -s -o uinput_proto uinput_proto.c                               # 64-bit ARM
+zig cc -target arm-linux-musleabihf -mcpu=cortex_a7 -static -O2 -s -o uinput_proto_armv7 uinput_proto.c     # 32-bit ARM
 ```
 
 The result is a ~40 KB static binary with no dependency on Android's libc. The app ships a

@@ -75,7 +75,11 @@ $env:ANDROID_SERIAL = Select-Device
 $model = (& $Adb shell getprop ro.product.model | Out-String).Trim()
 $abi   = (& $Adb shell getprop ro.product.cpu.abi | Out-String).Trim()
 Ok "Connected: $model ($abi)"
-if ($abi -ne 'arm64-v8a') { Warn "NeuroPad needs a 64-bit ARM phone; '$abi' will most likely not work." }
+if ($abi -like 'armeabi*') {
+    $Daemon = Join-Path $ScriptDir 'uinput_proto_armv7'
+} elseif ($abi -ne 'arm64-v8a') {
+    Warn "NeuroPad needs an ARM device; '$abi' will most likely not work."
+}
 
 # ---- 3. driver ------------------------------------------------------------
 Info '[2/5] Installing the driver...'

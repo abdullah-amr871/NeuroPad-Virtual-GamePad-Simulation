@@ -110,6 +110,17 @@ object XInputParser {
     /** Signed 16-bit stick value (Y already flipped by the caller) to 0..255. */
     internal fun scaleStick(value: Int): Int = ((32768 + value) / 256).coerceIn(0, 255)
 
+    /**
+     * The LED command of the Xbox 360 wired protocol; 0x06 lights player 1. Linux's xpad
+     * driver sends it when a pad is plugged in, and some third-party pads ignore rumble
+     * until they have received it. Phones whose kernel never bound xpad to the pad before
+     * NeuroPad claimed it would otherwise leave such pads silent.
+     */
+    fun ledPacket(pattern: Int = LED_PLAYER_1): ByteArray =
+        byteArrayOf(0x01, 0x03, pattern.coerceIn(0, 0x0F).toByte())
+
+    const val LED_PLAYER_1 = 0x06
+
     /** The rumble command of the Xbox 360 wired protocol. */
     fun rumblePacket(left: Int, right: Int): ByteArray = byteArrayOf(
         0x00, 0x08, 0x00,

@@ -65,16 +65,16 @@ Works with **XInput (Xbox-mode) USB gamepads**. Confirmed on the **GameSir G8 Pl
 
 ## Download
 
-**[Download NeuroPad 2.0.4](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/releases/tag/v2.0.4)** &nbsp;·&nbsp; [all releases](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/releases)
+**[Download NeuroPad 2.0.5](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/releases/tag/v2.0.5)** &nbsp;·&nbsp; [all releases](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/releases)
 
 | File | Use it when |
 | :--- | :--- |
-| `NeuroPad_2.0.4_OneClick_Installer.zip` | You have a computer nearby. Installs everything with one double-click. |
-| `NeuroPad_2.0.4.apk` | You want to install straight on the phone (Android 11+, Wireless debugging). |
+| `NeuroPad_2.0.5_OneClick_Installer.zip` | You have a computer nearby. Installs everything with one double-click. |
+| `NeuroPad_2.0.5.apk` | You want to install straight on the phone (Android 11+, Wireless debugging). |
 
 ## Requirements
 
-- A phone with a **64-bit ARM** processor (practically every phone since 2017) and USB host (OTG) support.
+- An **ARM** phone, tablet, Android TV or TV box (64-bit or 32-bit) with USB host (OTG) support.
 - Android 7.0 or newer. Setup without a computer needs Android 11 or newer.
 - A USB gamepad that speaks **XInput** (the Xbox 360 protocol).
 
@@ -93,7 +93,7 @@ Android closes the ADB port when the phone reboots. Afterwards, connect it again
 
 ### Option B: on the phone only (Android 11+)
 
-1. Install `NeuroPad_2.0.4.apk`.
+1. Install `NeuroPad_2.0.5.apk`.
 2. Open the **Connection** tab, keep **Wireless debugging** selected and tap **Start pairing**.
 3. In Developer options, enable **Wireless debugging**, tap the text itself and choose **Pair device with pairing code**.
 4. Type the six digit code into the NeuroPad notification.
@@ -104,6 +104,14 @@ Wireless debugging needs a Wi-Fi connection. Without one, turn on your own mobil
 ### Option C: rooted phones
 
 Choose **Root** in the Connection tab and grant superuser access. No ADB, Wi-Fi or computer is involved.
+
+### Option D: Android TV and TV boxes
+
+1. Install `NeuroPad_2.0.5.apk` on the TV (for example with a file manager from a USB stick, or `adb install`).
+2. In **Settings > Device Preferences > About**, click **Build** seven times, then in **Developer options** turn on **USB debugging** and **Network debugging** (or **ADB debugging**; the name depends on the TV).
+3. Open NeuroPad, choose **PC port 5555** in the Connection tab, plug in the gamepad and press the power button. Allow the debugging prompt on the TV the first time.
+
+If your TV has no network debugging option, run the PC installer once with the TV connected over the network (`adb connect <TV-IP>:5555`) instead.
 
 ## Tested controllers
 
@@ -251,6 +259,7 @@ The prebuilt driver is checked in at `app/src/main/assets/uinput_proto`. To rebu
 
 ```bash
 zig cc -target aarch64-linux-musl -static -O2 -s -o app/src/main/assets/uinput_proto daemon/uinput_proto.c
+zig cc -target arm-linux-musleabihf -mcpu=cortex_a7 -static -O2 -s -o app/src/main/assets/uinput_proto_armv7 daemon/uinput_proto.c
 ```
 
 | Path | Contents |

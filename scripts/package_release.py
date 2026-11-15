@@ -18,6 +18,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 APK = ROOT / "app" / "build" / "outputs" / "apk" / "release" / "app-release.apk"
 DAEMON = ROOT / "app" / "src" / "main" / "assets" / "uinput_proto"
+DAEMON_ARMV7 = ROOT / "app" / "src" / "main" / "assets" / "uinput_proto_armv7"
 INSTALLER = ROOT / "installer"
 DIST = ROOT / "dist"
 # Unix scripts must stay executable after extraction on macOS / Linux.
@@ -54,6 +55,7 @@ def main() -> int:
                 add(archive, path, f"{folder}/{path.relative_to(INSTALLER).as_posix()}")
         add(archive, APK, f"{folder}/NeuroPad.apk")
         add(archive, DAEMON, f"{folder}/uinput_proto")
+        add(archive, DAEMON_ARMV7, f"{folder}/uinput_proto_armv7")
         add(archive, ROOT / "LICENSE", f"{folder}/LICENSE.txt")
 
     sums = []
