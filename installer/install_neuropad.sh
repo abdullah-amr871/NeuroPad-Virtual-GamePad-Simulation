@@ -70,7 +70,11 @@ esac
 MODEL="$("$ADB" shell getprop ro.product.model | tr -d '\r')"
 ABI="$("$ADB" shell getprop ro.product.cpu.abi | tr -d '\r')"
 ok "Connected: $MODEL ($ABI)"
-[ "$ABI" = "arm64-v8a" ] || warn "NeuroPad needs a 64-bit ARM phone; '$ABI' will most likely not work."
+case "$ABI" in
+    arm64-v8a) ;;
+    armeabi-v7a|armeabi) DAEMON="$SCRIPT_DIR/uinput_proto_armv7" ;;
+    *) warn "NeuroPad needs an ARM device; '$ABI' will most likely not work." ;;
+esac
 
 # ---- 3. driver ------------------------------------------------------------
 info "[2/5] Installing the driver..."

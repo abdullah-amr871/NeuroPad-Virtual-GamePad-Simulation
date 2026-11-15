@@ -11,10 +11,12 @@ import android.hardware.usb.UsbDeviceConnection
 import android.hardware.usb.UsbEndpoint
 import android.hardware.usb.UsbInterface
 import android.hardware.usb.UsbManager
+import android.hardware.usb.UsbRequest
 import android.os.Build
 import android.os.Process
 import androidx.core.content.ContextCompat
 import io.github.abdullahamr871.neuropad.core.XInputParser
+import java.nio.ByteBuffer
 import java.util.Locale
 import kotlin.concurrent.thread
 
@@ -51,6 +53,12 @@ class UsbGamepadManager(context: Context, private val listener: Listener) {
     private var pollThread: Thread? = null
     @Volatile private var polling = false
     private var registered = false
+
+    // How rumble reaches the pad. Some phones refuse bulkTransfer() on the pad's interrupt
+    // OUT endpoint; UsbRequest is Android's documented way for interrupt endpoints.
+    @Volatile private var useRequest = false
+    @Volatile private var writeFailures = 0
+    @Volatile private var reportedNoEndpoint = false
 
     val isConnected: Boolean get() = synchronized(lock) { connection != null }
 
@@ -164,6 +172,13 @@ class UsbGamepadManager(context: Context, private val listener: Listener) {
         }
         val name = displayName(dev)
         listener.onMessage("Connected to $name" + if (endpointOut == null) " (no rumble endpoint)" else "")
+        useRequest = false
+        writeFailures = 0
+        reportedNoEndpoint = false
+        // Same start-up command as the kernel's xpad driver; harmless for pads that do not need it.
+        if (endpointOut != null) {
+            listener.onMessage(if (writeOut(XInputParser.ledPacket())) "Gamepad initialised" else "Gamepad did not accept the start-up command")
+        }
         listener.onConnected(dev, name)
         startPolling()
     }
@@ -228,17 +243,70 @@ class UsbGamepadManager(context: Context, private val listener: Listener) {
 
     /** Drives the two rumble motors of the physical pad (0..255 each). */
     fun writeRumble(left: Int, right: Int): Boolean {
+        val hasEndpoint = synchronized(lock) { connection != null && endpointOut != null }
+        if (!hasEndpoint) {
+            if (synchronized(lock) { connection != null } && !reportedNoEndpoint) {
+                reportedNoEndpoint = true
+                listener.onMessage("This gamepad offers no rumble endpoint in its current mode. Set its mode switch to Xbox / XInput.")
+            }
+            return false
+        }
+        return writeOut(XInputParser.rumblePacket(left, right))
+    }
+
+    /** Sends one packet to the pad's OUT endpoint; tries both transfer methods before giving up. */
+    private fun writeOut(packet: ByteArray): Boolean {
         val conn: UsbDeviceConnection
         val ep: UsbEndpoint
         synchronized(lock) {
             conn = connection ?: return false
             ep = endpointOut ?: return false
         }
-        val packet = XInputParser.rumblePacket(left, right)
+        if (!useRequest) {
+            val sent = try {
+                synchronized(conn) { conn.bulkTransfer(ep, packet, packet.size, WRITE_TIMEOUT_MS) }
+            } catch (_: Exception) {
+                -1
+            }
+            if (sent >= 0) {
+                writeFailures = 0
+                return true
+            }
+        }
+        if (Build.VERSION.SDK_INT >= 26 && sendWithRequest(conn, ep, packet)) {
+            if (!useRequest) {
+                useRequest = true
+                listener.onMessage("Rumble now sent with USB requests (bulk transfer was refused)")
+            }
+            writeFailures = 0
+            return true
+        }
+        val failures = ++writeFailures
+        if (failures == 1 || failures % 100 == 0) {
+            listener.onMessage("The gamepad did not accept a rumble command ($failures failed so far)")
+        }
+        return false
+    }
+
+    @androidx.annotation.RequiresApi(26)
+    private fun sendWithRequest(conn: UsbDeviceConnection, ep: UsbEndpoint, packet: ByteArray): Boolean {
+        val request = UsbRequest()
         return try {
-            synchronized(conn) { conn.bulkTransfer(ep, packet, packet.size, 100) } >= 0
-        } catch (e: Exception) {
+            if (!request.initialize(conn, ep)) return false
+            if (!request.queue(ByteBuffer.wrap(packet))) return false
+            // Only this request is ever queued on the connection; input is read with bulkTransfer.
+            synchronized(conn) { conn.requestWait(WRITE_TIMEOUT_MS.toLong()) } != null
+        } catch (_: Exception) {
             false
+        } finally {
+            try {
+                request.cancel()
+            } catch (_: Exception) {
+            }
+            try {
+                request.close()
+            } catch (_: Exception) {
+            }
         }
     }
 
@@ -275,6 +343,7 @@ class UsbGamepadManager(context: Context, private val listener: Listener) {
     companion object {
         const val ACTION_USB_PERMISSION = "io.github.abdullahamr871.neuropad.USB_PERMISSION"
         private const val XINPUT_SUBCLASS = 0x5D
+        private const val WRITE_TIMEOUT_MS = 100
 
         /** Vendors whose pads are known to speak XInput (Microsoft, GameSir, Logitech, ...). */
         private val KNOWN_VENDORS = setOf(

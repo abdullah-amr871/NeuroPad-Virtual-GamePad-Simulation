@@ -100,6 +100,11 @@ class InputPathTest {
         )
     }
 
+    @Test
+    fun `start-up packet lights player 1 like the kernel xpad driver`() {
+        assertArrayEquals(byteArrayOf(0x01, 0x03, 0x06), XInputParser.ledPacket())
+    }
+
     // ---- Report building ----------------------------------------------------------------
 
     private val pressedA = PadState(lx = 10, ly = 20, rx = 30, ry = 40, lt = 50, rt = 60, hat = 2, buttons = 1 shl Buttons.A)

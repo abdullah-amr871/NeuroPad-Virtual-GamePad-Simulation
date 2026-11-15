@@ -1,5 +1,23 @@
 # Changelog
 
+## 2.0.5
+
+### Added
+
+- **32-bit ARM and Android TV support**
+  ([#14](https://github.com/abdullah-amr871/NeuroPad-Virtual-GamePad-Simulation/issues/14)).
+  The app now installs on `armeabi-v7a` devices, such as TVs and TV boxes that run a
+  32-bit Android on a 64-bit CPU, and ships a 32-bit build of the driver. It shows up in
+  the Android TV launcher and no longer requires a touchscreen.
+
+### Fixed
+
+- **No rumble on some phones, even with the rumble test.** NeuroPad now sends the pad the
+  same start-up command as the kernel's Xbox driver when it connects (some pads ignore
+  rumble until they get it), and falls back to USB requests when a phone refuses the usual
+  transfer. Failed rumble commands, and pads without a rumble endpoint, are now written to
+  the activity log and the diagnostics report.
+
 ## 2.0.4
 
 Confirmed on a Nothing Phone (2) with the GameSir G8 Plus (MFi).

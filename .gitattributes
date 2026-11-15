@@ -5,7 +5,7 @@
 *.apk binary
 *.exe binary
 *.dll binary
-uinput_proto binary
+uinput_proto* binary
 *.jar binary
 gradlew text eol=lf
 *.png binary

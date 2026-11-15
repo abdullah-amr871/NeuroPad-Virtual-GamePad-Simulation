@@ -1,6 +1,7 @@
 package io.github.abdullahamr871.neuropad.bridge
 
 import android.content.Context
+import android.os.Build
 import java.io.File
 
 /**
@@ -12,15 +13,25 @@ import java.io.File
  */
 object DaemonInstaller {
     const val PATH = "/data/local/tmp/uinput_proto"
-    private const val ASSET = "uinput_proto"
+    private const val ASSET_ARM64 = "uinput_proto"
+    private const val ASSET_ARMV7 = "uinput_proto_armv7"
     private const val OK = "NEUROPAD_OK"
+
+    /**
+     * The driver build that matches the system's user space: 64-bit ARM where Android runs
+     * 64-bit code, 32-bit ARM otherwise (many TVs and TV boxes run a 32-bit Android on a
+     * 64-bit CPU, and their kernels may not run 64-bit programs at all).
+     */
+    fun assetName(supportedAbis: Array<String> = Build.SUPPORTED_ABIS): String =
+        if ("arm64-v8a" in supportedAbis) ASSET_ARM64 else ASSET_ARMV7
 
     class InstallException(message: String) : Exception(message)
 
     /** @return a short description of what was done, for the log. */
     fun ensureInstalled(context: Context, shell: Shell): String {
+        val asset = assetName()
         val bundled = try {
-            context.assets.open(ASSET).use { it.readBytes() }
+            context.assets.open(asset).use { it.readBytes() }
         } catch (e: Exception) {
             null
         }
@@ -29,18 +40,18 @@ object DaemonInstaller {
             if (installedSize > 0) return "using the driver already on the device"
             throw InstallException("The driver is missing from this build. Run the PC installer once.")
         }
-        if (installedSize == bundled.size.toLong()) return "driver up to date"
+        if (installedSize == bundled.size.toLong()) return "driver up to date ($asset)"
 
         // 1) Copy through shared storage, which both the app and the shell user can reach.
         val staged = stage(context, bundled)
         if (staged != null) {
             val out = shell.run("cp '${staged.absolutePath}' $PATH && chmod 755 $PATH && echo $OK")
             staged.delete()
-            if (OK in out && installedSize(shell) == bundled.size.toLong()) return "driver installed"
+            if (OK in out && installedSize(shell) == bundled.size.toLong()) return "driver installed ($asset)"
         }
         // 2) Root can read the app's private files directly.
         if (shell.root) {
-            val private = File(context.filesDir, ASSET).apply { writeBytes(bundled) }
+            val private = File(context.filesDir, asset).apply { writeBytes(bundled) }
             val out = shell.run("cp '${private.absolutePath}' $PATH && chmod 755 $PATH && echo $OK")
             private.delete()
             if (OK in out) return "driver installed (root)"
@@ -73,7 +84,7 @@ object DaemonInstaller {
 
     private fun stage(context: Context, bytes: ByteArray): File? = try {
         context.getExternalFilesDir(null)?.let { dir ->
-            File(dir, ASSET).apply { writeBytes(bytes) }
+            File(dir, "uinput_proto").apply { writeBytes(bytes) }
         }
     } catch (_: Exception) {
         null

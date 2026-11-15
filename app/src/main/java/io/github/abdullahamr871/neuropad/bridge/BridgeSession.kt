@@ -380,8 +380,10 @@ class BridgeSession(
         }
     }
 
+    @Volatile private var lastRumbleWriteOk = true
+
     private fun applyRumble(left: Int, right: Int, source: RumbleSource) {
-        usb.writeRumble(left, right)
+        lastRumbleWriteOk = usb.writeRumble(left, right)
         // Vibration that came from the phone in the first place is not played back on it.
         if (phoneRumbleOn && source != RumbleSource.PHONE_VIBRATION) phoneRumble.set(left, right)
         BridgeState.rumble.value = RumbleState(left, right, if (left > 0 || right > 0) source else RumbleSource.NONE)
@@ -402,6 +404,7 @@ class BridgeSession(
     /** Short pulse on the physical motors, independent of any game. */
     fun testRumble(left: Int, right: Int, durationMs: Long) {
         applyRumble(left, right, RumbleSource.TEST)
+        BridgeState.log("Rumble", if (lastRumbleWriteOk) "Test sent to the gamepad" else "Test failed: the gamepad did not accept the rumble command")
         synchronized(scheduler) {
             if (!scheduler.isShutdown) {
                 watchdog?.cancel(false)

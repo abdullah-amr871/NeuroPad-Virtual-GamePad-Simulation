@@ -57,4 +57,17 @@ jobs:
         working-directory: daemon
         run: |
           zig cc -target aarch64-linux-musl -static -O2 -s -Wall -Wextra -o uinput_proto uinput_proto.c
-          file uinput_proto
+          zig cc -target arm-linux-musleabihf -mcpu=cortex_a7 -static -O2 -s -Wall -Wextra -o uinput_proto_armv7 uinput_proto.c
+          file uinput_proto uinput_proto_armv7
+      - name: Check the bundled drivers match this source
+        run: |
+          cmp daemon/uinput_proto app/src/main/assets/uinput_proto
+          cmp daemon/uinput_proto_armv7 app/src/main/assets/uinput_proto_armv7
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: drivers
+          path: |
+            daemon/uinput_proto
+            daemon/uinput_proto_armv7
+          retention-days: 14
